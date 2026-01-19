@@ -7,7 +7,8 @@ class EditProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF8B0000),
+      // backgroundColor: const Color(0xFF8B0000),
+      backgroundColor: const Color.fromARGB(255, 31, 207, 247),
       body: Column(
         children: [
           /// APP BAR
@@ -79,7 +80,8 @@ class EditProfileScreen extends StatelessWidget {
                       // Simpan perubahan profil
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF8B0000),
+                      // backgroundColor: const Color(0xFF8B0000),
+                      backgroundColor: const Color.fromARGB(255, 51, 121, 242),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 80,
                         vertical: 14,

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 
 import 'package:store_app/views/screens/nav_screens/account_screen.dart';
-import 'package:store_app/views/screens/nav_screens/favorite_screen.dart';
+import 'package:store_app/views/screens/nav_screens/history_screen.dart';
 import 'package:store_app/views/screens/nav_screens/home_screen.dart';
-import 'package:store_app/views/screens/nav_screens/store_screen.dart';
+import 'package:store_app/views/screens/nav_screens/send_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -18,8 +18,8 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _pages = const [
     HomeScreen(),
-    FavoriteScreen(),
-    StoreScreen(),
+    HistoryScreen(),
+    SendScreen(),
     AccountScreen(),
   ];
 
@@ -44,7 +44,7 @@ class _MainScreenState extends State<MainScreen> {
           end: Alignment.bottomCenter,
         ),
         activeColor: Color(0xFF030F2F), // hijau FamilyMart
-        color: const Color.fromARGB(255, 11, 6, 6),
+        color: const Color.fromARGB(255, 114, 75, 75),
 
         items: const [
           TabItem(icon: Icons.home_work, title: 'Home'),

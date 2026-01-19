@@ -8,7 +8,8 @@ class AccountScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF8B0000),
+      // backgroundColor: const Color(0xFF8B0000),
+      backgroundColor: const Color.fromARGB(255, 31, 207, 247),
       body: Column(
         children: [
           const SizedBox(height: 30),
@@ -23,7 +24,7 @@ class AccountScreen extends StatelessWidget {
                   style: GoogleFonts.getFont(
                     'Poppins',
                     fontSize: 25,
-                    color: Colors.white,
+                    color: Color(0xFF030F2F),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -51,7 +52,7 @@ class AccountScreen extends StatelessWidget {
                       style: GoogleFonts.getFont(
                         'Poppins',
                         fontSize: 18,
-                        color: Colors.white,
+                        color: Color(0xFF030F2F),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -61,7 +62,7 @@ class AccountScreen extends StatelessWidget {
                       style: GoogleFonts.getFont(
                         'Poppins',
                         fontSize: 13,
-                        color: Colors.white70,
+                        color: Color(0xFF030F2F),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -111,6 +112,7 @@ class AccountScreen extends StatelessWidget {
                     title: 'Logout',
                     onTap: () {
                       // Implement logout functionality here
+                      Navigator.pop(context);
                     },
                   ),
                 ],
