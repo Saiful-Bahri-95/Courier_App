@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:store_app/views/screens/nav_screens/widgets/send_form/receive_detail.dart';
 
 class SendScreen extends StatefulWidget {
@@ -17,22 +16,21 @@ class _SendScreenState extends State<SendScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: Color.fromARGB(255, 31, 207, 247),
-      backgroundColor: Color(0xFFD25353),
+      backgroundColor: Color.fromARGB(255, 31, 207, 247),
+      // backgroundColor: Color(0xFFD25353),
       body: Column(
         children: [
           SizedBox(height: 30),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.only(left: 20, top: 20),
             child: Row(
               children: [
                 Text(
                   'Send Document',
-                  style: GoogleFonts.getFont(
-                    'Poppins',
+                  style: TextStyle(
                     fontSize: 25,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF030F2F),
+                    fontWeight: FontWeight.bold,
                     letterSpacing: 0.01,
                   ),
                 ),
@@ -44,22 +42,22 @@ class _SendScreenState extends State<SendScreen> {
             child: Container(
               padding: const EdgeInsets.all(20),
               decoration: const BoxDecoration(
-                color: Color.fromARGB(255, 67, 221, 255),
+                color: Color.fromARGB(255, 240, 245, 250),
                 borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                boxShadow: [
+                  BoxShadow(
+                    // ignore: deprecated_member_use
+                    color: Colors.black12,
+                    blurRadius: 10,
+                    offset: Offset(0, -5),
+                  ),
+                ],
               ),
               child: SingleChildScrollView(
                 padding: const EdgeInsets.only(bottom: 20, top: 10),
                 child: Form(
                   key: _formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildHeader(),
-                      const SizedBox(height: 20),
-                      _buildFormCard(),
-                    ],
-                  ),
+                  child: Column(children: [_buildFormCard()]),
                 ),
               ),
             ),
@@ -69,26 +67,15 @@ class _SendScreenState extends State<SendScreen> {
     );
   }
 
-  Widget _buildHeader() {
-    return Text(
-      "Detail Pengiriman",
-      style: TextStyle(
-        fontSize: 22,
-        fontWeight: FontWeight.bold,
-        color: Color(0xFF1E293B),
-      ),
-      textAlign: TextAlign.left,
-    );
-  }
-
   Widget _buildFormCard() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(10, 20, 10, 20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
+            // ignore: deprecated_member_use
             color: Colors.black.withOpacity(0.08),
             blurRadius: 20,
             offset: const Offset(0, 10),
@@ -96,23 +83,34 @@ class _SendScreenState extends State<SendScreen> {
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildInputField(
-            label: "Nama Perusahaan",
-            hint: "Masukkan PT",
-            icon: Icons.business,
+          Text(
+            "Detail Pengirim",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1E293B),
+            ),
           ),
-          _buildInputField(
-            label: "Nama Penerima / UP",
-            hint: "Masukkan UP",
-            icon: Icons.person,
-          ),
+          const SizedBox(height: 16),
+          _buildInputField(label: "Nama Perusahaan", icon: Icons.business),
+          _buildInputField(label: "Nama Pengirim", icon: Icons.person),
           _buildInputField(
             label: "Nomor Telepon",
-            hint: "Masukkan nomor telepon",
             icon: Icons.phone,
             keyboardType: TextInputType.phone,
           ),
+          SizedBox(height: 16),
+          Text(
+            "Jenis & Deskripsi Dokumen",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1E293B),
+            ),
+          ),
+          const SizedBox(height: 16),
           _buildDropdown(),
           _buildNoteField(),
           const SizedBox(height: 20),
@@ -124,7 +122,6 @@ class _SendScreenState extends State<SendScreen> {
 
   Widget _buildInputField({
     required String label,
-    required String hint,
     required IconData icon,
     TextInputType keyboardType = TextInputType.text,
   }) {
@@ -134,13 +131,16 @@ class _SendScreenState extends State<SendScreen> {
         keyboardType: keyboardType,
         decoration: InputDecoration(
           labelText: label,
-          hintText: hint,
           prefixIcon: Icon(icon),
           filled: true,
           fillColor: const Color(0xFFF8FAFC),
-          border: OutlineInputBorder(
+          enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: Colors.black, width: 1),
+            borderSide: BorderSide(color: Colors.grey),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Colors.black, width: 2),
           ),
         ),
         validator: (value) {
@@ -162,9 +162,13 @@ class _SendScreenState extends State<SendScreen> {
           prefixIcon: const Icon(Icons.description),
           filled: true,
           fillColor: const Color(0xFFF8FAFC),
-          border: OutlineInputBorder(
+          enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: Colors.black, width: 1),
+            borderSide: BorderSide(color: Colors.grey),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Colors.black, width: 2),
           ),
         ),
         initialValue: selectedDocumentType,
@@ -190,13 +194,16 @@ class _SendScreenState extends State<SendScreen> {
       maxLines: 3,
       decoration: InputDecoration(
         labelText: "Perihal / Desc",
-        hintText: "Masukan Perihal / Desc",
         prefixIcon: const Icon(Icons.notes_sharp),
         filled: true,
         fillColor: const Color(0xFFF8FAFC),
-        border: OutlineInputBorder(
+        enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: Colors.black, width: 1),
+          borderSide: BorderSide(color: Colors.grey),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Colors.black, width: 2),
         ),
       ),
     );
@@ -205,23 +212,27 @@ class _SendScreenState extends State<SendScreen> {
   Widget _buildSubmitButton() {
     return ElevatedButton(
       onPressed: () {
-        if (_formKey.currentState!.validate()) {
-          // Jika form valid, lanjut ke halaman kedua
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const ReceiverDetailScreen(),
-            ),
-          );
-        } else {
-          // Jika form tidak valid, tampilkan pesan
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Mohon lengkapi semua data terlebih dahulu"),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ReceiverDetailScreen()),
+        );
+        // if (_formKey.currentState!.validate()) {
+        //   // Jika form valid, lanjut ke halaman kedua
+        //   Navigator.push(
+        //     context,
+        //     MaterialPageRoute(
+        //       builder: (context) => const ReceiverDetailScreen(),
+        //     ),
+        //   );
+        // } else {
+        //   // Jika form tidak valid, tampilkan pesan
+        //   ScaffoldMessenger.of(context).showSnackBar(
+        //     const SnackBar(
+        //       content: Text("Mohon lengkapi semua data terlebih dahulu"),
+        //       backgroundColor: Colors.red,
+        //     ),
+        //   );
+        // }
       },
       style: ElevatedButton.styleFrom(
         minimumSize: const Size(double.infinity, 54),

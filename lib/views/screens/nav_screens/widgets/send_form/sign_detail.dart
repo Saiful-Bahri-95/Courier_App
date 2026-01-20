@@ -1,28 +1,25 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:signature/signature.dart';
-import 'package:store_app/views/screens/nav_screens/widgets/send_form/sign_detail.dart';
 
-class ReceiverDetailScreen extends StatefulWidget {
-  const ReceiverDetailScreen({super.key});
+class SignDetail extends StatefulWidget {
+  const SignDetail({super.key});
 
   @override
-  State<ReceiverDetailScreen> createState() => _ReceiverDetailScreenState();
+  State<SignDetail> createState() => _SignDetailState();
 }
 
-class _ReceiverDetailScreenState extends State<ReceiverDetailScreen> {
+class _SignDetailState extends State<SignDetail> {
   final _formKey = GlobalKey<FormState>();
-  final ImagePicker _picker = ImagePicker();
-  File? receiverImage;
 
-  Future<void> pickImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.camera);
-    if (image != null) {
-      setState(() {
-        receiverImage = File(image.path);
-      });
-    }
+  final SignatureController _signatureController = SignatureController(
+    penStrokeWidth: 3,
+    penColor: Colors.black,
+  );
+
+  @override
+  void dispose() {
+    _signatureController.dispose();
+    super.dispose();
   }
 
   @override
@@ -97,29 +94,46 @@ class _ReceiverDetailScreenState extends State<ReceiverDetailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            "Detail Penerima",
+            "Tanda Tangan  & Penerima",
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-
-          _buildInput("Nama Perusahaan", Icons.business),
-          _buildInput("Nama Penerima / UP", Icons.person),
-          _buildInput(
-            "Telepon",
-            Icons.phone,
-            keyboardType: TextInputType.phone,
-          ),
-
+          _buildInput('Nama Penerima', Icons.person),
           const SizedBox(height: 16),
-
-          _buildImagePicker(),
+          _buildSignaturePad(),
           const SizedBox(height: 20),
-
-          //_buildSignaturePad(),
-          // const SizedBox(height: 20),
           _buildFloatingBottomButton(),
         ],
       ),
+    );
+  }
+
+  Widget _buildSignaturePad() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          height: 180,
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Signature(
+            controller: _signatureController,
+            backgroundColor: const Color(0xFFF8FAFC),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            TextButton.icon(
+              onPressed: () => _signatureController.clear(),
+              icon: const Icon(Icons.refresh),
+              label: const Text("Ulangi Tanda Tangan"),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -153,85 +167,6 @@ class _ReceiverDetailScreenState extends State<ReceiverDetailScreen> {
     );
   }
 
-  // ===== Image Picker =====
-  Widget _buildImagePicker() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "Foto Penerima / Bukti Terima",
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 10),
-        GestureDetector(
-          onTap: pickImage,
-          child: Container(
-            height: 180,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.grey),
-            ),
-            child: receiverImage == null
-                ? const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.camera_alt, size: 40),
-                      SizedBox(height: 8),
-                      Text("Tap untuk ambil foto"),
-                    ],
-                  )
-                : ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
-                    child: Image.file(
-                      receiverImage!,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                    ),
-                  ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ===== Signature Pad =====
-  // Widget _buildSignaturePad() {
-  //   return Column(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       const Text(
-  //         "Tanda Tangan Digital",
-  //         style: TextStyle(fontWeight: FontWeight.w600),
-  //       ),
-  //       const SizedBox(height: 10),
-  //       Container(
-  //         height: 180,
-  //         decoration: BoxDecoration(
-  //           border: Border.all(color: Colors.grey),
-  //           borderRadius: BorderRadius.circular(14),
-  //         ),
-  //         child: Signature(
-  //           controller: _signatureController,
-  //           backgroundColor: const Color(0xFFF8FAFC),
-  //         ),
-  //       ),
-  //       const SizedBox(height: 10),
-  //       Row(
-  //         children: [
-  //           TextButton.icon(
-  //             onPressed: () => _signatureController.clear(),
-  //             icon: const Icon(Icons.refresh),
-  //             label: const Text("Ulangi Tanda Tangan"),
-  //           ),
-  //         ],
-  //       ),
-  //     ],
-  //   );
-  // }
-
-  // ===== Submit Button =====
   Widget _buildFloatingBottomButton() {
     return SafeArea(
       child: Row(
