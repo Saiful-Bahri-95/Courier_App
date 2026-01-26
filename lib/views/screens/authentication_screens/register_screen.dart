@@ -15,9 +15,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final AuthController _authController = AuthController();
 
-  late String email;
-  late String fullname;
-  late String password;
+  String email = '';
+  String password = '';
+  String fullname = '';
 
   bool _isLoading = false;
 
@@ -164,8 +164,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextFormField(
                     obscureText: true,
                     onChanged: (value) => password = value,
-                    validator: (value) =>
-                        value!.isEmpty ? 'Please enter your password' : null,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Password is required';
+                      }
+                      if (value.length < 8) {
+                        return 'Password must be at least 8 characters';
+                      }
+                      return null;
+                    },
                     decoration: _inputDecoration(
                       hintText: 'Enter your password',
                       iconPath: 'assets/icons/password.png',

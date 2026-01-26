@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:signature/signature.dart';
 import 'package:store_app/views/screens/nav_screens/widgets/send_form/sign_detail.dart';
 
 class ReceiverDetailScreen extends StatefulWidget {
@@ -16,13 +15,58 @@ class _ReceiverDetailScreenState extends State<ReceiverDetailScreen> {
   final ImagePicker _picker = ImagePicker();
   File? receiverImage;
 
-  Future<void> pickImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+  Future<void> pickImage(ImageSource source) async {
+    final XFile? image = await _picker.pickImage(
+      source: source,
+      imageQuality: 80,
+    );
     if (image != null) {
       setState(() {
         receiverImage = File(image.path);
       });
     }
+  }
+
+  void showImageSourcePicker() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Pilih Sumber Gambar",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text("Ambil dari Kamera"),
+                onTap: () {
+                  Navigator.pop(context);
+                  pickImage(ImageSource.camera);
+                },
+              ),
+
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text("Ambil dari Galeri"),
+                onTap: () {
+                  Navigator.pop(context);
+                  pickImage(ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -164,7 +208,9 @@ class _ReceiverDetailScreenState extends State<ReceiverDetailScreen> {
         ),
         const SizedBox(height: 10),
         GestureDetector(
-          onTap: pickImage,
+          onTap: () {
+            showImageSourcePicker();
+          },
           child: Container(
             height: 180,
             width: double.infinity,
@@ -195,41 +241,6 @@ class _ReceiverDetailScreenState extends State<ReceiverDetailScreen> {
       ],
     );
   }
-
-  // ===== Signature Pad =====
-  // Widget _buildSignaturePad() {
-  //   return Column(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       const Text(
-  //         "Tanda Tangan Digital",
-  //         style: TextStyle(fontWeight: FontWeight.w600),
-  //       ),
-  //       const SizedBox(height: 10),
-  //       Container(
-  //         height: 180,
-  //         decoration: BoxDecoration(
-  //           border: Border.all(color: Colors.grey),
-  //           borderRadius: BorderRadius.circular(14),
-  //         ),
-  //         child: Signature(
-  //           controller: _signatureController,
-  //           backgroundColor: const Color(0xFFF8FAFC),
-  //         ),
-  //       ),
-  //       const SizedBox(height: 10),
-  //       Row(
-  //         children: [
-  //           TextButton.icon(
-  //             onPressed: () => _signatureController.clear(),
-  //             icon: const Icon(Icons.refresh),
-  //             label: const Text("Ulangi Tanda Tangan"),
-  //           ),
-  //         ],
-  //       ),
-  //     ],
-  //   );
-  // }
 
   // ===== Submit Button =====
   Widget _buildFloatingBottomButton() {

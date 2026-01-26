@@ -18,7 +18,10 @@ class EditProfileScreen extends StatelessWidget {
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: Color.fromARGB(255, 0, 0, 0),
+                    ),
                     onPressed: () => Navigator.pop(context),
                   ),
                   Text(
@@ -26,7 +29,7 @@ class EditProfileScreen extends StatelessWidget {
                     style: GoogleFonts.getFont(
                       'Poppins',
                       fontSize: 20,
-                      color: Colors.white,
+                      color: const Color.fromARGB(255, 0, 0, 0),
                       fontWeight: FontWeight.w500,
                     ),
                   ),

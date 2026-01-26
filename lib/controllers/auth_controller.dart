@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:store_app/globar_variable.dart';
-import 'package:store_app/models/user.dart';
 import 'package:http/http.dart' as http;
 import 'package:store_app/views/screens/authentication_screens/login_screen.dart';
 import 'package:store_app/views/screens/main_screen.dart';
@@ -11,44 +10,37 @@ import '../services/manage_http_response.dart';
 
 class AuthController {
   Future<void> signUpUser({
-    required context,
+    required BuildContext context,
     required String email,
     required String fullname,
     required String password,
   }) async {
     try {
-      User user = User(
-        id: '',
-        fullname: fullname,
-        email: email,
-        state: '',
-        city: '',
-        locality: '',
-        password: password,
-        token: '',
-      );
       http.Response response = await http.post(
-        //inisialisasi alamat ulr kita
         Uri.parse('$uri/api/signup'),
-        body: user.toJson(),
-        headers: <String, String>{
-          "Content-Type":
-              'application/json; charset=UTF-8', //specify the context type as json
-        },
+        headers: const {'Content-Type': 'application/json; charset=UTF-8'},
+        body: jsonEncode({
+          'fullname': fullname,
+          'email': email,
+          'password': password,
+        }),
       );
+
       manageHttpResponse(
         response: response,
+        // ignore: use_build_context_synchronously
         context: context,
         onSuccess: () {
-          Navigator.push(
+          showSnackbar(context, 'Account has been created');
+          Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const LoginScreen()),
+            MaterialPageRoute(builder: (_) => const LoginScreen()),
           );
-          showSnackbar(context, 'Account has been Created');
         },
       );
     } catch (e) {
-      print('Error: $e');
+      // ignore: use_build_context_synchronously
+      showSnackbar(context, 'Server error');
     }
   }
 
@@ -66,17 +58,28 @@ class AuthController {
           "Content-Type": 'application/json; charset=UTF-8',
         },
       );
+
+      debugPrint('STATUS CODE: ${response.statusCode}');
+      debugPrint('RESPONSE BODY: ${response.body}');
+
       //handle response using the manage http response
       manageHttpResponse(
         response: response,
         context: context,
         onSuccess: () {
+          final data = jsonDecode(response.body);
+          final token = data['token'];
+
+          // nanti kita simpan pakai secure storage
+          debugPrint('JWT Token: $token');
+
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => const MainScreen()),
+            MaterialPageRoute(builder: (_) => const MainScreen()),
             (route) => false,
           );
-          showSnackbar(context, 'Login Successfull');
+
+          showSnackbar(context, 'Login successful');
         },
       );
     } catch (e) {

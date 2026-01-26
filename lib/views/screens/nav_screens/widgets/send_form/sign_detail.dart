@@ -11,6 +11,31 @@ class SignDetail extends StatefulWidget {
 class _SignDetailState extends State<SignDetail> {
   final _formKey = GlobalKey<FormState>();
 
+  DateTime _selectedDate = DateTime.now();
+
+  String _getDayName(DateTime date) {
+    const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+    return days[date.weekday % 7];
+  }
+
+  String _getDayMonth(DateTime date) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Agu',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des',
+    ];
+    return months[date.month - 1];
+  }
+
   final SignatureController _signatureController = SignatureController(
     penStrokeWidth: 3,
     penColor: Colors.black,
@@ -98,10 +123,12 @@ class _SignDetailState extends State<SignDetail> {
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
+          _buildTimelineDatePicker(),
+          const SizedBox(height: 25),
           _buildInput('Nama Penerima', Icons.person),
-          const SizedBox(height: 16),
+          const SizedBox(height: 2),
           _buildSignaturePad(),
-          const SizedBox(height: 20),
+          const SizedBox(height: 2),
           _buildFloatingBottomButton(),
         ],
       ),
@@ -112,8 +139,13 @@ class _SignDetailState extends State<SignDetail> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text(
+          "Tanda Tangan Penerima",
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 10),
         Container(
-          height: 180,
+          height: 220,
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey),
             borderRadius: BorderRadius.circular(14),
@@ -123,7 +155,7 @@ class _SignDetailState extends State<SignDetail> {
             backgroundColor: const Color(0xFFF8FAFC),
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 5),
         Row(
           children: [
             TextButton.icon(
@@ -201,10 +233,6 @@ class _SignDetailState extends State<SignDetail> {
           Expanded(
             child: ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SignDetail()),
-                );
                 // if (_formKey.currentState!.validate()) {
                 //   if (receiverImage == null) {
                 //     ScaffoldMessenger.of(context).showSnackBar(
@@ -238,7 +266,7 @@ class _SignDetailState extends State<SignDetail> {
                 elevation: 0,
               ),
               child: const Text(
-                "Next",
+                "Submit",
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -249,6 +277,102 @@ class _SignDetailState extends State<SignDetail> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTimelineDatePicker() {
+    final DateTime today = DateTime.now();
+    final List<DateTime> dates = List.generate(
+      5,
+      (index) =>
+          //DateTime(
+          // today.year,
+          // today.month,
+          today.subtract(const Duration(days: 2)).add(Duration(days: index)),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 90,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: dates.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final date = dates[index];
+              final isSelected =
+                  date.day == _selectedDate.day &&
+                  date.month == _selectedDate.month &&
+                  date.year == _selectedDate.year;
+
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedDate = date;
+                  });
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  width: 68,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? const Color(0xFF2563EB)
+                        : const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: isSelected
+                          ? const Color(0xFF2563EB)
+                          : Colors.grey.shade300,
+                    ),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              // ignore: deprecated_member_use
+                              color: Colors.blue.withOpacity(0.3),
+                              blurRadius: 12,
+                              offset: const Offset(0, 6),
+                            ),
+                          ]
+                        : [],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        _getDayName(date),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isSelected ? Colors.white : Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        date.day.toString(),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        _getDayMonth(date),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isSelected ? Colors.white : Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

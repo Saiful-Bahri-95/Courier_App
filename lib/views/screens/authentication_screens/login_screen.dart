@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:store_app/controllers/auth_controller.dart';
-import 'package:store_app/views/screens/main_screen.dart';
 
 import 'register_screen.dart';
 
@@ -15,9 +14,11 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final AuthController _authController = AuthController();
-  late String email;
-  late String password;
+  String email = '';
+  String password = '';
   bool _isLoading = false;
+
+  bool _obscure = true;
 
   loginUser() async {
     setState(() {
@@ -136,13 +137,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   SizedBox(height: 5),
                   TextFormField(
-                    obscureText: true,
+                    obscureText: _obscure,
                     onChanged: (value) {
                       password = value;
                     },
                     validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Please enter your password';
+                      if (value == null || value.isEmpty) {
+                        return 'Password is required';
+                      }
+                      if (value.length < 8) {
+                        return 'Password must be at least 8 characters';
                       }
                       return null;
                     },
@@ -161,7 +165,16 @@ class _LoginScreenState extends State<LoginScreen> {
                           height: 20,
                         ),
                       ),
-                      suffixIcon: Icon(Icons.visibility),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscure ? Icons.visibility : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscure = !_obscure;
+                          });
+                        },
+                      ),
 
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
@@ -200,14 +213,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: 5),
                   InkWell(
                     onTap: () {
-                      // if (_formKey.currentState!.validate()) {
-                      //   // Process data.
-                      //   loginUser();
-                      // }
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => MainScreen()),
-                      );
+                      if (_formKey.currentState!.validate()) {
+                        // Process data.
+                        loginUser();
+                      }
                     },
                     child: Container(
                       width: 355,

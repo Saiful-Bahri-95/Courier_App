@@ -25,7 +25,7 @@ class HeaderWidget extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Color.fromARGB(255, 42, 31, 147),
+                  Color.fromARGB(255, 72, 60, 182),
                   Color.fromARGB(255, 12, 210, 255),
                 ],
               ),
