@@ -1,37 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:store_app/controllers/auth_controller.dart';
 
 import 'register_screen.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final AuthController _authController = AuthController();
+
   String email = '';
   String password = '';
   bool _isLoading = false;
-
   bool _obscure = true;
 
-  loginUser() async {
+  Future<void> loginUser() async {
     setState(() {
       _isLoading = true;
     });
-    await _authController
-        .signInUser(context: context, email: email, password: password)
-        .whenComplete(() {
-          //_formKey.currentState!.reset(); (bisa di gunakan nanti)
-          setState(() {
-            _isLoading = false;
-          });
-        });
+
+    await _authController.signInUser(
+      context: context,
+      ref: ref, // ✅ SEKARANG VALID
+      email: email,
+      password: password,
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
@@ -199,6 +203,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: TextButton(
                       onPressed: () {
                         // Navigate to Forgot Password Screen
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (context) => const ForgotPasswordScreen(),
+                        //   ),
+                        // );
                       },
                       child: Text(
                         'Forgot Password',

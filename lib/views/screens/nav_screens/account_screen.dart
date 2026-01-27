@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:store_app/controllers/auth_controller.dart';
 import 'package:store_app/views/screens/nav_screens/widgets/edit_profile_screen.dart';
 
-class AccountScreen extends StatelessWidget {
-  const AccountScreen({super.key});
+class AccountScreen extends ConsumerWidget {
+  AccountScreen({super.key});
+
+  final AuthController _authController = AuthController();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       // backgroundColor: const Color(0xFF8B0000),
       backgroundColor: const Color.fromARGB(255, 31, 207, 247),
@@ -110,9 +114,11 @@ class AccountScreen extends StatelessWidget {
                   _SettingItem(
                     icon: Icons.logout,
                     title: 'Logout',
-                    onTap: () {
-                      // Implement logout functionality here
-                      Navigator.pop(context);
+                    onTap: () async {
+                      await _authController.signOutUser(
+                        context: context,
+                        ref: ref,
+                      );
                     },
                   ),
                 ],
