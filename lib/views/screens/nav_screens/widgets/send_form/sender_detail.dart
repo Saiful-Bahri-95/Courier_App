@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:store_app/models/document_data.dart';
 import 'package:store_app/views/screens/nav_screens/widgets/send_form/receive_detail.dart';
 
 class SenderDetail extends StatefulWidget {
-  const SenderDetail({super.key});
+  final DocumentData documentData;
+  const SenderDetail({super.key, required this.documentData});
 
   @override
   State<SenderDetail> createState() => _SenderDetailState();
@@ -11,7 +13,21 @@ class SenderDetail extends StatefulWidget {
 class _SenderDetailState extends State<SenderDetail> {
   final _formKey = GlobalKey<FormState>();
 
+  final companyCtrl = TextEditingController();
+  final senderCtrl = TextEditingController();
+  final phoneCtrl = TextEditingController();
+  final descCtrl = TextEditingController();
+
   String? selectedDocumentType;
+
+  @override
+  void dispose() {
+    companyCtrl.dispose();
+    senderCtrl.dispose();
+    phoneCtrl.dispose();
+    descCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +83,7 @@ class _SenderDetailState extends State<SenderDetail> {
     );
   }
 
-   Widget _buildFormCard() {
+  Widget _buildFormCard() {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -94,12 +110,21 @@ class _SenderDetailState extends State<SenderDetail> {
             ),
           ),
           const SizedBox(height: 16),
-          _buildInputField(label: "Nama Perusahaan", icon: Icons.business),
-          _buildInputField(label: "Nama Pengirim", icon: Icons.person),
+          _buildInputField(
+            label: "Nama Perusahaan",
+            icon: Icons.business,
+            controller: companyCtrl,
+          ),
+          _buildInputField(
+            label: "Nama Pengirim",
+            icon: Icons.person,
+            controller: senderCtrl,
+          ),
           _buildInputField(
             label: "Nomor Telepon",
             icon: Icons.phone,
             keyboardType: TextInputType.phone,
+            controller: phoneCtrl,
           ),
           SizedBox(height: 16),
           Text(
@@ -123,11 +148,13 @@ class _SenderDetailState extends State<SenderDetail> {
   Widget _buildInputField({
     required String label,
     required IconData icon,
+    required TextEditingController controller,
     TextInputType keyboardType = TextInputType.text,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
+        controller: controller,
         keyboardType: keyboardType,
         decoration: InputDecoration(
           labelText: label,
@@ -191,6 +218,7 @@ class _SenderDetailState extends State<SenderDetail> {
 
   Widget _buildNoteField() {
     return TextFormField(
+      controller: descCtrl,
       maxLines: 3,
       decoration: InputDecoration(
         labelText: "Perihal / Desc",
@@ -212,27 +240,22 @@ class _SenderDetailState extends State<SenderDetail> {
   Widget _buildSubmitButton() {
     return ElevatedButton(
       onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ReceiverDetailScreen()),
-        );
-        // if (_formKey.currentState!.validate()) {
-        //   // Jika form valid, lanjut ke halaman kedua
-        //   Navigator.push(
-        //     context,
-        //     MaterialPageRoute(
-        //       builder: (context) => const ReceiverDetailScreen(),
-        //     ),
-        //   );
-        // } else {
-        //   // Jika form tidak valid, tampilkan pesan
-        //   ScaffoldMessenger.of(context).showSnackBar(
-        //     const SnackBar(
-        //       content: Text("Mohon lengkapi semua data terlebih dahulu"),
-        //       backgroundColor: Colors.red,
-        //     ),
-        //   );
-        // }
+        if (_formKey.currentState!.validate()) {
+          widget.documentData
+            ..senderCompany = companyCtrl.text
+            ..senderName = senderCtrl.text
+            ..senderPhone = phoneCtrl.text
+            ..documentType = selectedDocumentType
+            ..description = descCtrl.text;
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  ReceiverDetailScreen(documentData: widget.documentData),
+            ),
+          );
+        }
       },
       style: ElevatedButton.styleFrom(
         minimumSize: const Size(double.infinity, 54),

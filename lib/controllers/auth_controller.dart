@@ -2,8 +2,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:store_app/globar_variable.dart';
+import 'package:store_app/config/globar_variable.dart';
 import 'package:http/http.dart' as http;
 import 'package:store_app/models/user.dart';
 import 'package:store_app/provider/user_provider.dart';
@@ -24,7 +23,7 @@ class AuthController {
   }) async {
     try {
       http.Response response = await http.post(
-        Uri.parse('$uri/api/signup'),
+        Uri.parse('${ApiConfig.baseUrl}/api/signup'),
         headers: const {'Content-Type': 'application/json; charset=UTF-8'},
         body: jsonEncode({
           'fullname': fullname,
@@ -60,40 +59,38 @@ class AuthController {
   }) async {
     try {
       final response = await http.post(
-        Uri.parse('$uri/api/signin'),
+        Uri.parse('${ApiConfig.baseUrl}/api/signin'),
         headers: {'Content-Type': 'application/json; charset=UTF-8'},
         body: jsonEncode({'email': email, 'password': password}),
       );
 
-      manageHttpResponse(
-        response: response,
+      // ❌ JANGAN parse dulu
+      if (response.statusCode != 200) {
+        final error = jsonDecode(response.body);
+        showSnackbar(context, error['message'] ?? 'Login failed');
+        return;
+      }
+
+      // ✅ BARU parse jika sukses
+      final data = jsonDecode(response.body);
+      final user = User.fromMap(data);
+
+      await AuthSecureStorage.saveToken(user.token);
+      await AuthSecureStorage.saveUser(user);
+
+      ref.read(userProvider.notifier).setUser(user);
+
+      Navigator.pushAndRemoveUntil(
         // ignore: use_build_context_synchronously
-        context: context,
-        onSuccess: () async {
-          final data = jsonDecode(response.body);
-
-          // 🔥 1. Buat object User dari response
-          final user = User.fromMap(data);
-
-          // 🔐 2. Simpan token & user ke SecureStorage
-          await AuthSecureStorage.saveToken(user.token);
-          await AuthSecureStorage.saveUser(user);
-
-          // 🌍 3. Simpan user ke Riverpod (global state)
-          ref.read(userProvider.notifier).setUser(user);
-
-          // 🚀 4. Pindah ke MainScreen
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (_) => const MainScreen()),
-            (route) => false,
-          );
-
-          showSnackbar(context, 'Login successful');
-        },
+        context,
+        MaterialPageRoute(builder: (_) => const MainScreen()),
+        (route) => false,
       );
+
+      showSnackbar(context, 'Login successful');
     } catch (e) {
-      showSnackbar(context, 'Server error');
+      //print("LOGIN ERROR: $e");
+      showSnackbar(context, 'Unexpected error occurred');
     }
   }
 

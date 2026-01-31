@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:store_app/models/document_data.dart';
 import 'package:store_app/views/screens/nav_screens/widgets/send_form/sign_detail.dart';
 
 class ReceiverDetailScreen extends StatefulWidget {
-  const ReceiverDetailScreen({super.key});
+  final DocumentData documentData;
+  const ReceiverDetailScreen({super.key, required this.documentData});
 
   @override
   State<ReceiverDetailScreen> createState() => _ReceiverDetailScreenState();
@@ -12,6 +14,11 @@ class ReceiverDetailScreen extends StatefulWidget {
 
 class _ReceiverDetailScreenState extends State<ReceiverDetailScreen> {
   final _formKey = GlobalKey<FormState>();
+
+  final companyCtrl = TextEditingController();
+  final receiverCtrl = TextEditingController();
+  final phoneCtrl = TextEditingController();
+
   final ImagePicker _picker = ImagePicker();
   File? receiverImage;
 
@@ -67,6 +74,14 @@ class _ReceiverDetailScreenState extends State<ReceiverDetailScreen> {
         );
       },
     );
+  }
+
+  @override
+  void dispose() {
+    companyCtrl.dispose();
+    receiverCtrl.dispose();
+    phoneCtrl.dispose();
+    super.dispose();
   }
 
   @override
@@ -146,12 +161,21 @@ class _ReceiverDetailScreenState extends State<ReceiverDetailScreen> {
           ),
           const SizedBox(height: 16),
 
-          _buildInput("Nama Perusahaan", Icons.business),
-          _buildInput("Nama Penerima / UP", Icons.person),
           _buildInput(
-            "Telepon",
-            Icons.phone,
+            label: "Nama Perusahaan",
+            icon: Icons.business,
+            controller: companyCtrl,
+          ),
+          _buildInput(
+            label: "Nama Penerima / UP",
+            icon: Icons.person,
+            controller: receiverCtrl,
+          ),
+          _buildInput(
+            label: "Telepon",
+            icon: Icons.phone,
             keyboardType: TextInputType.phone,
+            controller: phoneCtrl,
           ),
 
           const SizedBox(height: 16),
@@ -159,22 +183,22 @@ class _ReceiverDetailScreenState extends State<ReceiverDetailScreen> {
           _buildImagePicker(),
           const SizedBox(height: 20),
 
-          //_buildSignaturePad(),
-          // const SizedBox(height: 20),
           _buildFloatingBottomButton(),
         ],
       ),
     );
   }
 
-  Widget _buildInput(
-    String label,
-    IconData icon, {
+  Widget _buildInput({
+    required String label,
+    required IconData icon,
+    required TextEditingController controller,
     TextInputType keyboardType = TextInputType.text,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
+        controller: controller,
         keyboardType: keyboardType,
         decoration: InputDecoration(
           labelText: label,
@@ -277,33 +301,21 @@ class _ReceiverDetailScreenState extends State<ReceiverDetailScreen> {
           Expanded(
             child: ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SignDetail()),
-                );
-                // if (_formKey.currentState!.validate()) {
-                //   if (receiverImage == null) {
-                //     ScaffoldMessenger.of(context).showSnackBar(
-                //       const SnackBar(
-                //         content: Text("Silakan ambil foto penerima"),
-                //       ),
-                //     );
-                //     return;
-                //   }
+                if (_formKey.currentState!.validate()) {
+                  widget.documentData
+                    ..receiverCompany = companyCtrl.text
+                    ..receiverName = receiverCtrl.text
+                    ..receiverPhone = phoneCtrl.text
+                    ..receiverImage = receiverImage;
 
-                //   // if (_signatureController.isEmpty) {
-                //   //   ScaffoldMessenger.of(context).showSnackBar(
-                //   //     const SnackBar(content: Text("Silakan isi tanda tangan")),
-                //   //   );
-                //   //   return;
-                //   // }
-
-                //   ScaffoldMessenger.of(context).showSnackBar(
-                //     const SnackBar(
-                //       content: Text("Data penerima berhasil disimpan"),
-                //     ),
-                //   );
-                // }
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          SignDetail(documentData: widget.documentData),
+                    ),
+                  );
+                }
               },
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(0, 54),

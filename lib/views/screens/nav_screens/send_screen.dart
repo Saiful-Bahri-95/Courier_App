@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:store_app/models/document_data.dart';
 import 'package:store_app/views/screens/nav_screens/widgets/send_form/sender_detail.dart';
 
 class SendScreen extends StatelessWidget {
@@ -6,6 +7,6 @@ class SendScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SenderDetail();
+    return SenderDetail(documentData: DocumentData());
   }
 }

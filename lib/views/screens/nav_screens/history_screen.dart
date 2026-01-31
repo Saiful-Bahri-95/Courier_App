@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:store_app/models/document_list_model.dart';
+import 'package:store_app/services/document_service.dart';
+import 'package:store_app/views/screens/nav_screens/widgets/send_form/preview_document.dart';
 
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
@@ -45,9 +48,87 @@ class HistoryScreen extends StatelessWidget {
               ),
               child: SingleChildScrollView(
                 padding: const EdgeInsets.only(bottom: 20, top: 10),
-                child: Column(children: [
-                    
-                  ],
+                child: FutureBuilder<List<DocumentListModel>>(
+                  future: DocumentService.getDocumentList(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text(
+                          snapshot.error.toString(),
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      );
+                    }
+
+                    final documents = snapshot.data ?? [];
+
+                    if (documents.isEmpty) {
+                      return const Center(child: Text('Belum ada dokumen'));
+                    }
+
+                    return Column(
+                      children: documents.map((doc) {
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: InkWell(
+                            onTap: () {
+                              // 🔥 nanti kita arahkan ke detail screen
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => PreviewDocumentScreen(
+                                    documentId: doc.id,
+                                    documentData: null, // 🔥 view mode
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.description,
+                                  color: Color(0xFF030F2F),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        doc.senderCompany,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        doc.receiverCompany,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  },
                 ),
               ),
             ),

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:signature/signature.dart';
+import 'package:store_app/models/document_data.dart';
+
+import 'preview_document.dart';
 
 class SignDetail extends StatefulWidget {
-  const SignDetail({super.key});
+  final DocumentData documentData;
+  const SignDetail({super.key, required this.documentData});
 
   @override
   State<SignDetail> createState() => _SignDetailState();
@@ -10,6 +14,8 @@ class SignDetail extends StatefulWidget {
 
 class _SignDetailState extends State<SignDetail> {
   final _formKey = GlobalKey<FormState>();
+
+  final signedNameCtrl = TextEditingController();
 
   DateTime _selectedDate = DateTime.now();
 
@@ -43,6 +49,7 @@ class _SignDetailState extends State<SignDetail> {
 
   @override
   void dispose() {
+    signedNameCtrl.dispose();
     _signatureController.dispose();
     super.dispose();
   }
@@ -125,7 +132,11 @@ class _SignDetailState extends State<SignDetail> {
           const SizedBox(height: 16),
           _buildTimelineDatePicker(),
           const SizedBox(height: 25),
-          _buildInput('Nama Penerima', Icons.person),
+          _buildInput(
+            label: "Nama Penerima",
+            icon: Icons.person,
+            controller: signedNameCtrl,
+          ),
           const SizedBox(height: 2),
           _buildSignaturePad(),
           const SizedBox(height: 2),
@@ -169,14 +180,16 @@ class _SignDetailState extends State<SignDetail> {
     );
   }
 
-  Widget _buildInput(
-    String label,
-    IconData icon, {
+  Widget _buildInput({
+    required String label,
+    required IconData icon,
+    required TextEditingController controller,
     TextInputType keyboardType = TextInputType.text,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
+        controller: controller,
         keyboardType: keyboardType,
         decoration: InputDecoration(
           labelText: label,
@@ -232,31 +245,49 @@ class _SignDetailState extends State<SignDetail> {
           // Next
           Expanded(
             child: ElevatedButton(
-              onPressed: () {
-                // if (_formKey.currentState!.validate()) {
-                //   if (receiverImage == null) {
-                //     ScaffoldMessenger.of(context).showSnackBar(
-                //       const SnackBar(
-                //         content: Text("Silakan ambil foto penerima"),
-                //       ),
-                //     );
-                //     return;
-                //   }
+              onPressed: () async {
+                debugPrint("SUBMIT BUTTON PRESSED");
+                if (!_formKey.currentState!.validate()) return;
 
-                //   // if (_signatureController.isEmpty) {
-                //   //   ScaffoldMessenger.of(context).showSnackBar(
-                //   //     const SnackBar(content: Text("Silakan isi tanda tangan")),
-                //   //   );
-                //   //   return;
-                //   // }
+                // 🔥 VALIDASI SIGNATURE DULU
+                if (_signatureController.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Tanda tangan wajib diisi")),
+                  );
+                  return;
+                }
 
-                //   ScaffoldMessenger.of(context).showSnackBar(
-                //     const SnackBar(
-                //       content: Text("Data penerima berhasil disimpan"),
-                //     ),
-                //   );
-                // }
+                await Future.delayed(const Duration(milliseconds: 100));
+
+                // BARU convert ke PNG
+                final signatureBytes = await _signatureController.toPngBytes();
+
+                if (signatureBytes == null) {
+                  // ignore: use_build_context_synchronously
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Gagal memproses tanda tangan"),
+                    ),
+                  );
+                  return;
+                }
+                // Pindah ke preview screen
+                widget.documentData
+                  ..receivedDate = _selectedDate
+                  ..signedName = signedNameCtrl.text
+                  ..signature = signatureBytes;
+
+                Navigator.push(
+                  // ignore: use_build_context_synchronously
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PreviewDocumentScreen(
+                      documentData: widget.documentData,
+                    ),
+                  ),
+                );
               },
+
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(0, 54),
                 backgroundColor: const Color(0xFF2563EB),
