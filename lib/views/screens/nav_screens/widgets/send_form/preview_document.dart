@@ -17,7 +17,7 @@ class PreviewDocumentScreen extends StatelessWidget {
 
   String _formatDateTime(DateTime? date) {
     if (date == null) return "-";
-    return DateFormat('EEE, d/MM/y, HH:mm:ss').format(date);
+    return DateFormat('EEEE, d/MM/y, HH:mm:ss').format(date);
   }
 
   @override

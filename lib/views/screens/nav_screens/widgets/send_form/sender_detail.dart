@@ -36,9 +36,8 @@ class _SenderDetailState extends State<SenderDetail> {
       // backgroundColor: Color(0xFFD25353),
       body: Column(
         children: [
-          SizedBox(height: 30),
           Padding(
-            padding: const EdgeInsets.only(left: 20, top: 20),
+            padding: const EdgeInsets.only(left: 20, top: 50, bottom: 15),
             child: Row(
               children: [
                 Text(
@@ -53,28 +52,13 @@ class _SenderDetailState extends State<SenderDetail> {
               ],
             ),
           ),
-          SizedBox(height: 24),
+
           Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              decoration: const BoxDecoration(
-                color: Color.fromARGB(255, 240, 245, 250),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-                boxShadow: [
-                  BoxShadow(
-                    // ignore: deprecated_member_use
-                    color: Colors.black12,
-                    blurRadius: 10,
-                    offset: Offset(0, -5),
-                  ),
-                ],
-              ),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(bottom: 20, top: 10),
-                child: Form(
-                  key: _formKey,
-                  child: Column(children: [_buildFormCard()]),
-                ),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.only(top: 20),
+              child: Form(
+                key: _formKey,
+                child: Column(children: [_buildFormCard()]),
               ),
             ),
           ),
@@ -85,15 +69,16 @@ class _SenderDetailState extends State<SenderDetail> {
 
   Widget _buildFormCard() {
     return Container(
+      height: 630,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
         boxShadow: [
           BoxShadow(
             // ignore: deprecated_member_use
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 20,
+            color: Colors.black.withOpacity(0.7),
+            blurRadius: 30,
             offset: const Offset(0, 10),
           ),
         ],

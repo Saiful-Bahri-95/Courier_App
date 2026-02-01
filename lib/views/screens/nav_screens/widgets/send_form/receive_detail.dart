@@ -90,9 +90,8 @@ class _ReceiverDetailScreenState extends State<ReceiverDetailScreen> {
       backgroundColor: const Color.fromARGB(255, 31, 207, 247),
       body: Column(
         children: [
-          // SizedBox(height: 30),
           Padding(
-            padding: const EdgeInsets.only(left: 20, top: 50, bottom: 24),
+            padding: const EdgeInsets.only(left: 20, top: 50, bottom: 15),
             child: Row(
               children: [
                 Text(
@@ -107,28 +106,13 @@ class _ReceiverDetailScreenState extends State<ReceiverDetailScreen> {
               ],
             ),
           ),
-          // SizedBox(height: 24),
+
           Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(5),
-              decoration: const BoxDecoration(
-                color: Color.fromARGB(255, 240, 245, 250),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-                boxShadow: [
-                  BoxShadow(
-                    // ignore: deprecated_member_use
-                    color: Colors.black12,
-                    blurRadius: 10,
-                    offset: Offset(0, -5),
-                  ),
-                ],
-              ),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Form(
-                  key: _formKey,
-                  child: Column(children: [_buildFormCard()]),
-                ),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.only(top: 20),
+              child: Form(
+                key: _formKey,
+                child: Column(children: [_buildFormCard()]),
               ),
             ),
           ),
@@ -139,15 +123,16 @@ class _ReceiverDetailScreenState extends State<ReceiverDetailScreen> {
 
   Widget _buildFormCard() {
     return Container(
+      height: 670,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
         boxShadow: [
           BoxShadow(
             // ignore: deprecated_member_use
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 20,
+            color: Colors.black.withOpacity(0.7),
+            blurRadius: 30,
             offset: const Offset(0, 10),
           ),
         ],
@@ -181,7 +166,6 @@ class _ReceiverDetailScreenState extends State<ReceiverDetailScreen> {
           const SizedBox(height: 16),
 
           _buildImagePicker(),
-          const SizedBox(height: 20),
 
           _buildFloatingBottomButton(),
         ],

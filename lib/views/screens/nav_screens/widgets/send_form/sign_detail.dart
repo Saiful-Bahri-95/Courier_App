@@ -20,7 +20,7 @@ class _SignDetailState extends State<SignDetail> {
   DateTime _selectedDate = DateTime.now();
 
   String _getDayName(DateTime date) {
-    const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     return days[date.weekday % 7];
   }
 
@@ -60,9 +60,8 @@ class _SignDetailState extends State<SignDetail> {
       backgroundColor: const Color.fromARGB(255, 31, 207, 247),
       body: Column(
         children: [
-          // SizedBox(height: 30),
           Padding(
-            padding: const EdgeInsets.only(left: 20, top: 50, bottom: 24),
+            padding: const EdgeInsets.only(left: 20, top: 50, bottom: 15),
             child: Row(
               children: [
                 Text(
@@ -77,28 +76,13 @@ class _SignDetailState extends State<SignDetail> {
               ],
             ),
           ),
-          // SizedBox(height: 24),
+
           Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(5),
-              decoration: const BoxDecoration(
-                color: Color.fromARGB(255, 240, 245, 250),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-                boxShadow: [
-                  BoxShadow(
-                    // ignore: deprecated_member_use
-                    color: Colors.black12,
-                    blurRadius: 10,
-                    offset: Offset(0, -5),
-                  ),
-                ],
-              ),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Form(
-                  key: _formKey,
-                  child: Column(children: [_buildFormCard()]),
-                ),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.only(top: 20),
+              child: Form(
+                key: _formKey,
+                child: Column(children: [_buildFormCard()]),
               ),
             ),
           ),
@@ -109,14 +93,15 @@ class _SignDetailState extends State<SignDetail> {
 
   Widget _buildFormCard() {
     return Container(
+      height: 670,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
         boxShadow: [
           BoxShadow(
             // ignore: deprecated_member_use
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withOpacity(0.7),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -126,7 +111,7 @@ class _SignDetailState extends State<SignDetail> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            "Tanda Tangan  & Penerima",
+            "Tanda Tangan & Penerima",
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
@@ -139,7 +124,7 @@ class _SignDetailState extends State<SignDetail> {
           ),
           const SizedBox(height: 2),
           _buildSignaturePad(),
-          const SizedBox(height: 2),
+
           _buildFloatingBottomButton(),
         ],
       ),

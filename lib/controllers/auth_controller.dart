@@ -110,13 +110,9 @@ class AuthController {
         (route) => false,
       );
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Logged out successfully')));
+      showSnackbar(context, 'Logged out successfully');
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Error during logout')));
+      showSnackbar(context, 'Error during logout');
     }
   }
 }

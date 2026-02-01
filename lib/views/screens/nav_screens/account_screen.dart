@@ -25,11 +25,11 @@ class AccountScreen extends ConsumerWidget {
               children: [
                 Text(
                   'Settings',
-                  style: GoogleFonts.getFont(
-                    'Poppins',
+                  style: TextStyle(
                     fontSize: 25,
                     color: Color(0xFF030F2F),
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.01,
                   ),
                 ),
               ],

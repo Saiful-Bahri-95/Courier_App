@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:store_app/models/document_list_model.dart';
 import 'package:store_app/services/document_service.dart';
 import 'package:store_app/views/screens/nav_screens/widgets/send_form/preview_document.dart';
 
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
+
+  String _formatDate(DateTime date) {
+    return DateFormat('EEEE, dd MMM yyyy').format(date);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +40,7 @@ class HistoryScreen extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(20),
               decoration: const BoxDecoration(
-                color: Color.fromARGB(255, 240, 245, 250),
+                color: Color(0xFFE0E0E0),
                 borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
                 boxShadow: [
                   BoxShadow(
@@ -72,57 +77,189 @@ class HistoryScreen extends StatelessWidget {
 
                     return Column(
                       children: documents.map((doc) {
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: InkWell(
-                            onTap: () {
-                              // 🔥 nanti kita arahkan ke detail screen
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => PreviewDocumentScreen(
-                                    documentId: doc.id,
-                                    documentData: null, // 🔥 view mode
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 2,
+                              vertical: 2,
+                            ),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  // ignore: deprecated_member_use
+                                  color: Colors.black54.withOpacity(0.5),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: InkWell(
+                              onTap: () {
+                                // 🔥 nanti kita arahkan ke detail screen
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => PreviewDocumentScreen(
+                                      documentId: doc.id,
+                                      documentData: null, // 🔥 view mode
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.description,
-                                  color: Color(0xFF030F2F),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                );
+                              },
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  /// Status & Date
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(
-                                        doc.senderCompany,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 15,
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color.fromARGB(
+                                            255,
+                                            8,
+                                            255,
+                                            210,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            5,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              // ignore: deprecated_member_use
+                                              color: Colors.black54.withOpacity(
+                                                0.3,
+                                              ),
+                                              blurRadius: 3,
+                                              offset: const Offset(0, 5),
+                                            ),
+                                          ],
+                                        ),
+                                        child: const Text(
+                                          "Completed",
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 12,
+                                          ),
                                         ),
                                       ),
-                                      const SizedBox(height: 4),
                                       Text(
-                                        doc.receiverCompany,
-                                        style: const TextStyle(
+                                        _formatDate(doc.createdAt),
+                                        style: TextStyle(
+                                          color: Colors.grey.shade600,
+                                          fontSize: 12,
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 15,
                                         ),
                                       ),
                                     ],
                                   ),
-                                ),
-                              ],
+
+                                  const SizedBox(height: 2),
+                                  Divider(
+                                    thickness: 2,
+                                    color: Colors.grey.shade300,
+                                  ),
+                                  const SizedBox(height: 5),
+
+                                  /// FROM
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      /// ICON PLACEHOLDER
+                                      Container(
+                                        width: 36,
+                                        height: 36,
+                                        decoration: BoxDecoration(
+                                          color: Colors.blue.shade100,
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        child: Image.asset(
+                                          'assets/icons/up.png',
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            doc.senderCompany,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 1),
+                                          Text(
+                                            "From ${doc.senderName}",
+                                            style: TextStyle(
+                                              color: Colors.grey.shade600,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+
+                                  const SizedBox(height: 12),
+
+                                  /// TO
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      /// ICON PLACEHOLDER
+                                      Container(
+                                        width: 36,
+                                        height: 36,
+                                        decoration: BoxDecoration(
+                                          color: Colors.orange.shade100,
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        child: Image.asset(
+                                          'assets/icons/location.png',
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            doc.receiverCompany,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 1),
+                                          Text(
+                                            "To ${doc.receiverName}",
+                                            style: TextStyle(
+                                              color: Colors.grey.shade600,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         );

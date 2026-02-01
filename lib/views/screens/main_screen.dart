@@ -18,8 +18,8 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _pages = [
     HomeScreen(),
-    HistoryScreen(),
     SendScreen(),
+    HistoryScreen(),
     AccountScreen(),
   ];
 
@@ -43,13 +43,13 @@ class _MainScreenState extends State<MainScreen> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
-        activeColor: Color(0xFF030F2F), // hijau FamilyMart
+        activeColor: Color(0xFF030F2F), // hijau FamilyMart Color(0xFF030F2F),
         color: const Color.fromARGB(255, 114, 75, 75),
 
         items: const [
           TabItem(icon: Icons.home_work, title: 'Home'),
-          TabItem(icon: Icons.history_edu, title: 'History'),
           TabItem(icon: Icons.send_rounded, title: 'Send'),
+          TabItem(icon: Icons.history_edu, title: 'History'),
           TabItem(icon: Icons.person_outline, title: 'Account'),
         ],
 
