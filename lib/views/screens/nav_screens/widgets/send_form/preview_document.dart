@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:store_app/models/document_detail_model.dart';
 import 'package:store_app/services/cloudinary_service.dart';
 import 'package:store_app/services/document_service.dart';
+import 'package:store_app/services/manage_http_response.dart';
+import 'package:store_app/views/screens/main_screen.dart';
 
 class PreviewDocumentScreen extends StatelessWidget {
   final DocumentData? documentData;
@@ -240,15 +242,15 @@ class PreviewDocumentScreen extends StatelessWidget {
                     signatureUrl,
                   );
 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Dokumen berhasil dikirim")),
-                  );
+                  showSnackbar(context, 'Dokumen berhasil dikirim');
 
-                  Navigator.popUntil(context, (route) => route.isFirst);
-                } catch (e) {
-                  ScaffoldMessenger.of(
+                  Navigator.pushAndRemoveUntil(
                     context,
-                  ).showSnackBar(SnackBar(content: Text(e.toString())));
+                    MaterialPageRoute(builder: (_) => const MainScreen()),
+                    (route) => false,
+                  );
+                } catch (e) {
+                  showSnackbar(context, e.toString());
                 }
               },
         child: Text(isViewMode ? "Dokumen Dikirim" : "Submit Dokumen"),

@@ -87,7 +87,7 @@ class _ReceiverDetailScreenState extends State<ReceiverDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 31, 207, 247),
+      backgroundColor: const Color(0xFFA79EFF),
       body: Column(
         children: [
           Padding(

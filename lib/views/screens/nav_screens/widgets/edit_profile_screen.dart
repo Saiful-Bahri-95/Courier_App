@@ -8,7 +8,7 @@ class EditProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       // backgroundColor: const Color(0xFF8B0000),
-      backgroundColor: const Color.fromARGB(255, 31, 207, 247),
+      backgroundColor: const Color(0xFFA79EFF),
       body: Column(
         children: [
           /// APP BAR

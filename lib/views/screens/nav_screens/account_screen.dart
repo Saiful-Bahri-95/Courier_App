@@ -13,7 +13,7 @@ class AccountScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       // backgroundColor: const Color(0xFF8B0000),
-      backgroundColor: const Color.fromARGB(255, 31, 207, 247),
+      backgroundColor: const Color(0xFFA79EFF),
       body: Column(
         children: [
           const SizedBox(height: 30),
@@ -46,6 +46,7 @@ class AccountScreen extends ConsumerWidget {
                 const CircleAvatar(
                   radius: 28,
                   backgroundImage: AssetImage('assets/images/banner2.png'),
+                  backgroundColor: Colors.white,
                 ),
                 const SizedBox(width: 14),
                 Column(

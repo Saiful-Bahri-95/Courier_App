@@ -32,7 +32,7 @@ class _SenderDetailState extends State<SenderDetail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 31, 207, 247),
+      backgroundColor: const Color(0xFFA79EFF),
       // backgroundColor: Color(0xFFD25353),
       body: Column(
         children: [

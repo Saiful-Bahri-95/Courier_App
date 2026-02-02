@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:store_app/models/document_list_model.dart';
 import 'package:store_app/services/document_service.dart';
-import 'package:store_app/views/screens/nav_screens/widgets/send_form/preview_document.dart';
+import 'package:store_app/views/screens/nav_screens/widgets/preview_history.dart';
 
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
@@ -14,7 +14,7 @@ class HistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 31, 207, 247),
+      backgroundColor: Color(0xFFA79EFF),
       // backgroundColor: Color(0xFFD25353),
       body: Column(
         children: [
@@ -38,7 +38,7 @@ class HistoryScreen extends StatelessWidget {
           SizedBox(height: 24),
           Expanded(
             child: Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.only(top: 10, left: 5, right: 5),
               decoration: const BoxDecoration(
                 color: Color(0xFFE0E0E0),
                 borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
@@ -52,7 +52,12 @@ class HistoryScreen extends StatelessWidget {
                 ],
               ),
               child: SingleChildScrollView(
-                padding: const EdgeInsets.only(bottom: 20, top: 10),
+                padding: const EdgeInsets.only(
+                  bottom: 20,
+                  top: 10,
+                  left: 10,
+                  right: 10,
+                ),
                 child: FutureBuilder<List<DocumentListModel>>(
                   future: DocumentService.getDocumentList(),
                   builder: (context, snapshot) {
@@ -99,17 +104,34 @@ class HistoryScreen extends StatelessWidget {
                             ),
                             child: InkWell(
                               onTap: () {
-                                // 🔥 nanti kita arahkan ke detail screen
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => PreviewDocumentScreen(
-                                      documentId: doc.id,
-                                      documentData: null, // 🔥 view mode
-                                    ),
-                                  ),
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (context) {
+                                    return DraggableScrollableSheet(
+                                      expand: false,
+                                      initialChildSize: 0.85,
+                                      minChildSize: 0.5,
+                                      maxChildSize: 0.95,
+                                      builder: (context, scrollController) {
+                                        return Container(
+                                          decoration: const BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.vertical(
+                                              top: Radius.circular(24),
+                                            ),
+                                          ),
+                                          child: BottomSheetPreviewDocument(
+                                            documentId: doc.id,
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
                                 );
                               },
+
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
