@@ -147,7 +147,7 @@ class _ReceiverDetailScreenState extends State<ReceiverDetailScreen> {
           const SizedBox(height: 16),
 
           _buildInput(
-            label: "Nama Perusahaan",
+            label: "Alamat / Nama Perusahaan",
             icon: Icons.business,
             controller: companyCtrl,
           ),

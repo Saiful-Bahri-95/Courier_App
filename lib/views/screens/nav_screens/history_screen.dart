@@ -108,22 +108,28 @@ class HistoryScreen extends StatelessWidget {
                                   context: context,
                                   isScrollControlled: true,
                                   backgroundColor: Colors.transparent,
-                                  builder: (context) {
+                                  builder: (_) {
                                     return DraggableScrollableSheet(
                                       expand: false,
-                                      initialChildSize: 0.85,
+                                      initialChildSize: 0.65,
                                       minChildSize: 0.5,
-                                      maxChildSize: 0.95,
+                                      maxChildSize: 1,
                                       builder: (context, scrollController) {
-                                        return Container(
-                                          decoration: const BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.vertical(
-                                              top: Radius.circular(24),
+                                        return SafeArea(
+                                          top: false,
+                                          child: Container(
+                                            decoration: const BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.vertical(
+                                                    top: Radius.circular(24),
+                                                  ),
                                             ),
-                                          ),
-                                          child: BottomSheetPreviewDocument(
-                                            documentId: doc.id,
+                                            child: BottomSheetPreviewDocument(
+                                              documentId: doc.id,
+                                              scrollController:
+                                                  scrollController,
+                                            ),
                                           ),
                                         );
                                       },

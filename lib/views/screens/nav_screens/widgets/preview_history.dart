@@ -3,15 +3,21 @@ import 'package:intl/intl.dart';
 import 'package:store_app/models/document_data.dart';
 import 'package:store_app/models/document_detail_model.dart';
 import 'package:store_app/services/document_service.dart';
+import 'package:store_app/services/manage_http_response.dart';
 
 class BottomSheetPreviewDocument extends StatelessWidget {
   final String documentId;
+  final ScrollController scrollController;
 
-  const BottomSheetPreviewDocument({super.key, required this.documentId});
+  const BottomSheetPreviewDocument({
+    super.key,
+    required this.documentId,
+    required this.scrollController,
+  });
 
   String _formatDateTime(DateTime? date) {
     if (date == null) return "-";
-    return DateFormat('EEEE, d/MM/y, HH:mm:ss').format(date);
+    return DateFormat('EEEE, dd MMM y').format(date);
   }
 
   @override
@@ -59,53 +65,172 @@ class BottomSheetPreviewDocument extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    "Preview Dokumen",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    "Info Pengiriman",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
             ),
             SizedBox(height: 8),
 
-            const Divider(height: 2),
+            const Divider(height: 5, color: Colors.black),
 
             /// ================= CONTENT =================
             Expanded(
               child: SingleChildScrollView(
+                controller: scrollController,
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _section("Pengirim", [
-                      _item("Perusahaan", data.senderCompany),
-                      _item("Nama Pengirim", data.senderName),
-                      _item("Telepon", data.senderPhone),
-                    ]),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Detail Pengirim",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Spacer(),
 
-                    _section("Dokumen", [
-                      _item("Jenis Dokumen", data.documentType),
-                      _item("Deskripsi", data.description),
-                    ]),
+                        Text(
+                          _formatDateTime(data.receivedDate),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromARGB(255, 120, 119, 119),
+                          ),
+                        ),
+                        SizedBox(width: 5),
+                      ],
+                    ),
 
-                    _section("Penerima", [
-                      _item("Perusahaan", data.receiverCompany),
-                      _item("Nama", data.receiverName),
-                      _item("Telepon", data.receiverPhone),
-                    ]),
+                    SizedBox(height: 16),
 
-                    if (data.receiverImage != null ||
-                        data.receiverImageUrl != null)
-                      _section("Foto Penerima", [_receiverImagePreview(data)]),
+                    /// ===== DETAIL PENGIRIM =====
+                    _gradientInfoCard(
+                      title: data.senderCompany ?? "-",
+                      subtitle: "From ${data.senderName}",
+                      phone: data.senderPhone,
+                      imagePath: 'assets/icons/Office.png',
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF5F77F5), Color(0xFF37458F)],
+                      ),
+                    ),
 
-                    _section("Tanda Tangan", [
-                      _item("Tanggal", _formatDateTime(data.receivedDate)),
-                      _item("Nama", data.signedName),
-                    ]),
+                    const SizedBox(height: 16),
+                    Text(
+                      "Detail Penerima",
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 16),
 
-                    if (data.signature != null || data.signatureUrl != null)
-                      _section("Preview Tanda Tangan", [
-                        _signaturePreview(data),
-                      ]),
+                    /// ===== DETAIL PENERIMA =====
+                    _gradientInfoCard(
+                      title: data.receiverCompany ?? "-",
+                      subtitle: "To ${data.receiverName}",
+                      phone: data.receiverPhone,
+                      imagePath: 'assets/icons/penerima.png',
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF3BB54A), Color(0xFF1F7A33)],
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    /// ===== KETERANGAN =====
+                    Text(
+                      "Keterangan",
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    _descriptionCard(
+                      description: data.description ?? "-",
+                      documentType: data.documentType,
+                      signedName: data.signedName,
+                      onTapBuktiFoto: () {
+                        _showBuktiFoto(context, data);
+                      },
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    /// ===== BUKTI FOTO =====
+                    Row(
+                      children: [
+                        /// DELETE
+                        SizedBox(
+                          width: 110,
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              backgroundColor: const Color(0xFFEAF3E5),
+                              side: BorderSide.none,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            onPressed: () {
+                              _showDeleteConfirmation(
+                                context,
+                                onConfirm: () {
+                                  // TODO: panggil API delete di sini
+                                  // contoh:
+                                  // DocumentService.deleteDocument(documentId);
+
+                                  showSnackbar(
+                                    context,
+                                    'Data berhasil dihapus',
+                                  );
+
+                                  Navigator.pop(context); // tutup bottom sheet
+                                },
+                              );
+                            },
+
+                            child: const Text(
+                              "Delete",
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 255, 0, 0),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(width: 16),
+
+                        /// SHARE
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF5FA53A),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            onPressed: () {},
+                            child: const Text(
+                              "Share",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -115,68 +240,309 @@ class BottomSheetPreviewDocument extends StatelessWidget {
       },
     );
   }
+}
 
-  // ================= HELPERS =================
+Widget _gradientInfoCard({
+  required String title,
+  required String subtitle,
+  required String? phone,
+  required Gradient gradient,
+  required String imagePath,
+}) {
+  return Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      gradient: gradient,
+      borderRadius: BorderRadius.circular(20),
+      boxShadow: [
+        BoxShadow(
+          // ignore: deprecated_member_use
+          color: Colors.black.withOpacity(0.9),
+          blurRadius: 5,
+          offset: const Offset(4, 4),
+        ),
+      ],
+    ),
+    child: Row(
+      children: [
+        /// TEXT
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(subtitle, style: const TextStyle(color: Colors.white)),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Icon(Icons.phone_in_talk, size: 16, color: Colors.white),
+                  SizedBox(width: 5),
+                  Text(
+                    phone ?? "-",
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
 
-  static Widget _section(String title, List<Widget> children) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+        /// ILLUSTRATION PLACEHOLDER
+        Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
+          child: Transform.scale(
+            scale: 1.7,
+            child: Image.asset(imagePath, fit: BoxFit.contain),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _descriptionCard({
+  required String description,
+  required String? documentType,
+  required String? signedName,
+  required VoidCallback onTapBuktiFoto,
+}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      /// MAIN CARD (SEJAJAR DENGAN PENGIRIM & PENERIMA)
+      Container(
+        width: double.infinity,
+        // ✅ ikut parent
+        padding: const EdgeInsets.only(
+          left: 30,
+          right: 30,
+          top: 20,
+          bottom: 10,
+        ),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF00B4B0), Color(0xFF007E7C)],
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              // ignore: deprecated_member_use
+              color: Colors.black.withOpacity(0.9),
+              blurRadius: 5,
+              offset: const Offset(4, 4),
+            ),
+          ],
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            /// DESC BOX (PUTIH)
+            Container(
+              width: double.infinity, // ✅ penuh
+              constraints: const BoxConstraints(minHeight: 120),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                'Description : \n $description',
+                style: const TextStyle(fontSize: 14),
+              ),
             ),
+
             const SizedBox(height: 12),
-            ...children,
+
+            Row(
+              children: [
+                Icon(Icons.description_rounded, size: 18, color: Colors.white),
+                const SizedBox(width: 5),
+                Text(
+                  documentType ?? "-",
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(Icons.person_pin_outlined, size: 16, color: Colors.white),
+                const SizedBox(width: 5),
+                Text(
+                  signedName ?? "-",
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ],
+            ),
           ],
         ),
       ),
-    );
-  }
 
-  static Widget _item(String label, String? value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(width: 120, child: Text(label)),
-          const SizedBox(width: 8, child: Text(":")),
-          Expanded(child: Text(value ?? "-")),
-        ],
+      const SizedBox(height: 8),
+
+      /// BUKTI FOTO LABEL
+      InkWell(
+        onTap: onTapBuktiFoto,
+
+        child: Row(
+          children: const [
+            Icon(Icons.remove_red_eye, size: 20),
+            SizedBox(width: 6),
+            Text(
+              "Bukti Foto",
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
       ),
+    ],
+  );
+}
+
+void _showBuktiFoto(BuildContext context, DocumentData data) {
+  showDialog(
+    context: context,
+    builder: (_) {
+      return Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(16),
+        child: Stack(
+          children: [
+            /// IMAGE PREVIEW
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Container(color: Colors.black, child: _previewImage(data)),
+            ),
+
+            /// CLOSE BUTTON
+            Positioned(
+              top: 8,
+              right: 8,
+              child: InkWell(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    // ignore: deprecated_member_use
+                    color: Colors.black.withOpacity(0.6),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.close, color: Colors.white, size: 20),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+Widget _previewImage(DocumentData data) {
+  if (data.receiverImage != null) {
+    return Image.file(data.receiverImage!, fit: BoxFit.contain);
+  }
+
+  if (data.receiverImageUrl != null && data.receiverImageUrl!.isNotEmpty) {
+    return Image.network(
+      data.receiverImageUrl!,
+      fit: BoxFit.contain,
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return const Center(child: CircularProgressIndicator());
+      },
+      errorBuilder: (_, __, ___) =>
+          const Center(child: Icon(Icons.broken_image)),
     );
   }
 
-  static Widget _receiverImagePreview(DocumentData data) {
-    if (data.receiverImage != null) {
-      return Image.file(data.receiverImage!, height: 200, fit: BoxFit.cover);
-    }
+  return const Center(
+    child: Text("Tidak ada foto", style: TextStyle(color: Colors.white)),
+  );
+}
 
-    if (data.receiverImageUrl != null && data.receiverImageUrl!.isNotEmpty) {
-      return Image.network(
-        data.receiverImageUrl!,
-        height: 200,
-        fit: BoxFit.cover,
+void _showDeleteConfirmation(
+  BuildContext context, {
+  required VoidCallback onConfirm,
+}) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              /// TITLE
+              const Text(
+                "Hapus Dokumen?",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 24),
+
+              /// ACTION BUTTONS
+              Row(
+                children: [
+                  /// CANCEL
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text("Batal"),
+                    ),
+                  ),
+
+                  const SizedBox(width: 12),
+
+                  /// DELETE
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red.shade600,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context); // tutup dialog
+                        onConfirm(); // 🔥 eksekusi delete
+                      },
+                      child: const Text(
+                        "Hapus",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       );
-    }
-
-    return const Text("-");
-  }
-
-  static Widget _signaturePreview(DocumentData data) {
-    if (data.signature != null) {
-      return Image.memory(data.signature!, height: 150);
-    }
-
-    if (data.signatureUrl != null && data.signatureUrl!.isNotEmpty) {
-      return Image.network(data.signatureUrl!, height: 150);
-    }
-
-    return const Text("-");
-  }
+    },
+  );
 }
