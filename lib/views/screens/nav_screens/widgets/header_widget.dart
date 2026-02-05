@@ -57,7 +57,7 @@ class HeaderWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               child: TextField(
                 decoration: InputDecoration(
-                  hintText: 'Cari produk favoritmu...',
+                  hintText: 'Cari Apapun Disini',
                   hintStyle: TextStyle(color: Colors.grey.shade600),
                   prefixIcon: const Icon(Icons.search),
                   suffixIcon: IconButton(

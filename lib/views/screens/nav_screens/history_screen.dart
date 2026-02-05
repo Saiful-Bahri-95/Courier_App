@@ -4,8 +4,25 @@ import 'package:store_app/models/document_list_model.dart';
 import 'package:store_app/services/document_service.dart';
 import 'package:store_app/views/screens/nav_screens/widgets/preview_history.dart';
 
-class HistoryScreen extends StatelessWidget {
+class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
+
+  @override
+  State<HistoryScreen> createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends State<HistoryScreen> {
+  late Future<List<DocumentListModel>> _futureDocuments;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDocuments();
+  }
+
+  void _loadDocuments() {
+    _futureDocuments = DocumentService.getDocumentList();
+  }
 
   String _formatDate(DateTime date) {
     return DateFormat('EEEE, dd MMM yyyy').format(date);
@@ -59,7 +76,7 @@ class HistoryScreen extends StatelessWidget {
                   right: 10,
                 ),
                 child: FutureBuilder<List<DocumentListModel>>(
-                  future: DocumentService.getDocumentList(),
+                  future: _futureDocuments,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
@@ -77,7 +94,29 @@ class HistoryScreen extends StatelessWidget {
                     final documents = snapshot.data ?? [];
 
                     if (documents.isEmpty) {
-                      return const Center(child: Text('Belum ada dokumen'));
+                      return SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.6,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/images/searchdata.png',
+                                width: 300,
+                              ),
+                              const SizedBox(height: 2),
+                              const Text(
+                                'Belum ada dokumen',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
                     }
 
                     return Column(
@@ -103,8 +142,8 @@ class HistoryScreen extends StatelessWidget {
                               ],
                             ),
                             child: InkWell(
-                              onTap: () {
-                                showModalBottomSheet(
+                              onTap: () async {
+                                final result = await showModalBottomSheet<bool>(
                                   context: context,
                                   isScrollControlled: true,
                                   backgroundColor: Colors.transparent,
@@ -136,6 +175,13 @@ class HistoryScreen extends StatelessWidget {
                                     );
                                   },
                                 );
+
+                                /// 🔥 JIKA ADA DELETE → REFRESH
+                                if (result == true) {
+                                  setState(() {
+                                    _loadDocuments();
+                                  });
+                                }
                               },
 
                               child: Column(

@@ -60,6 +60,9 @@ extension DocumentDetailMapper on DocumentDetailModel {
       ..receiverCompany = receiverCompany
       ..receiverName = receiverName
       ..receiverPhone = receiverPhone
+      ..receiverImageUrl =
+          receiverImageUrl // 🔥 INI YANG HILANG
+      ..signatureUrl = signatureUrl
       ..receivedDate = receivedDate
       ..signedName = signedName;
     // ⚠️ receiverImage & signature TIDAK diisi File

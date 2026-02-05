@@ -179,22 +179,23 @@ class BottomSheetPreviewDocument extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(14),
                               ),
                             ),
-                            onPressed: () {
-                              _showDeleteConfirmation(
+
+                            onPressed: () async {
+                              final confirm = await _showDeleteConfirmation(
                                 context,
-                                onConfirm: () {
-                                  // TODO: panggil API delete di sini
-                                  // contoh:
-                                  // DocumentService.deleteDocument(documentId);
-
-                                  showSnackbar(
-                                    context,
-                                    'Data berhasil dihapus',
-                                  );
-
-                                  Navigator.pop(context); // tutup bottom sheet
-                                },
                               );
+
+                              if (confirm == true) {
+                                await DocumentService.deleteDocument(
+                                  documentId,
+                                );
+
+                                // 🔥 INI YANG WAJIB
+                                Navigator.pop(
+                                  context,
+                                  true,
+                                ); // TUTUP BOTTOMSHEET + KIRIM RESULT
+                              }
                             },
 
                             child: const Text(
@@ -356,7 +357,7 @@ Widget _descriptionCard({
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                'Description : \n $description',
+                'Description : \n$description',
                 style: const TextStyle(fontSize: 14),
               ),
             ),
@@ -366,7 +367,7 @@ Widget _descriptionCard({
             Row(
               children: [
                 Icon(Icons.description_rounded, size: 18, color: Colors.white),
-                const SizedBox(width: 5),
+                const SizedBox(width: 4),
                 Text(
                   documentType ?? "-",
                   style: const TextStyle(color: Colors.white),
@@ -449,11 +450,9 @@ void _showBuktiFoto(BuildContext context, DocumentData data) {
 }
 
 Widget _previewImage(DocumentData data) {
-  if (data.receiverImage != null) {
-    return Image.file(data.receiverImage!, fit: BoxFit.contain);
-  }
-
-  if (data.receiverImageUrl != null && data.receiverImageUrl!.isNotEmpty) {
+  // 🔥 VIEW MODE (URL)
+  if (data.receiverImageUrl != null &&
+      data.receiverImageUrl!.trim().isNotEmpty) {
     return Image.network(
       data.receiverImageUrl!,
       fit: BoxFit.contain,
@@ -462,8 +461,13 @@ Widget _previewImage(DocumentData data) {
         return const Center(child: CircularProgressIndicator());
       },
       errorBuilder: (_, __, ___) =>
-          const Center(child: Icon(Icons.broken_image)),
+          const Center(child: Icon(Icons.broken_image, color: Colors.white)),
     );
+  }
+
+  // CREATE MODE (FILE)
+  if (data.receiverImage != null) {
+    return Image.file(data.receiverImage!, fit: BoxFit.contain);
   }
 
   return const Center(
@@ -471,77 +475,79 @@ Widget _previewImage(DocumentData data) {
   );
 }
 
-void _showDeleteConfirmation(
-  BuildContext context, {
-  required VoidCallback onConfirm,
-}) {
-  showDialog(
+Future<bool?> _showDeleteConfirmation(BuildContext context) {
+  return showDialog<bool>(
     context: context,
     barrierDismissible: false,
     builder: (context) {
-      return Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              /// TITLE
-              const Text(
-                "Hapus Dokumen?",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
+      bool isDeleting = false;
 
-              const SizedBox(height: 24),
-
-              /// ACTION BUTTONS
-              Row(
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  /// CANCEL
-                  Expanded(
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text("Batal"),
-                    ),
+                  const Text(
+                    "Hapus Dokumen?",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-
-                  const SizedBox(width: 12),
-
-                  /// DELETE
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red.shade600,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: isDeleting
+                              ? null
+                              : () => Navigator.pop(context, false),
+                          child: const Text(
+                            "Batal",
+                            style: TextStyle(color: Colors.black),
+                          ),
                         ),
                       ),
-                      onPressed: () {
-                        Navigator.pop(context); // tutup dialog
-                        onConfirm(); // 🔥 eksekusi delete
-                      },
-                      child: const Text(
-                        "Hapus",
-                        style: TextStyle(color: Colors.white),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                          ),
+                          onPressed: isDeleting
+                              ? null
+                              : () async {
+                                  setState(() => isDeleting = true);
+                                  Navigator.pop(
+                                    context,
+                                    true,
+                                  ); // ✅ hanya return true
+                                },
+                          child: isDeleting
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  "Hapus",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       );
     },
   );

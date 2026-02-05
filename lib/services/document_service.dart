@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:store_app/config/globar_variable.dart';
 import 'package:store_app/models/document_detail_model.dart';
@@ -77,5 +78,36 @@ class DocumentService {
 
     final body = jsonDecode(response.body);
     return DocumentDetailModel.fromJson(body['data']);
+  }
+
+  static Future<void> deleteDocument(String documentId) async {
+    final token = await AuthSecureStorage.getToken();
+
+    final response = await http.delete(
+      Uri.parse('${ApiConfig.baseUrl}/documents/$documentId'),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json; charset=UTF-8",
+      },
+    );
+
+    // ✅ SUCCESS CASE
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      return;
+    }
+
+    // ❌ ERROR CASE
+    String message = 'Gagal menghapus dokumen';
+
+    if (response.body.isNotEmpty) {
+      try {
+        final body = jsonDecode(response.body);
+        message = body['message'] ?? message;
+      } catch (_) {
+        // body bukan JSON → abaikan
+      }
+    }
+
+    throw Exception(message);
   }
 }
