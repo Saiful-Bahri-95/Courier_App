@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:store_app/models/document_data.dart';
 import 'package:store_app/models/document_detail_model.dart';
 import 'package:store_app/services/document_service.dart';
-import 'package:store_app/services/manage_http_response.dart';
 
 class BottomSheetPreviewDocument extends StatelessWidget {
   final String documentId;
