@@ -1,8 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:store_app/controllers/auth_controller.dart';
+import 'package:store_app/provider/user_provider.dart';
+import 'package:store_app/services/cloudinary_service.dart';
 
-class EditProfileScreen extends StatelessWidget {
+class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
+
+  @override
+  ConsumerState<EditProfileScreen> createState() => _EditProfileScreenState();
+}
+
+class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
+  late TextEditingController nameController;
+  String? avatarUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    final user = ref.read(userProvider)!;
+    nameController = TextEditingController(text: user.fullname);
+    avatarUrl = user.avatar;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +85,33 @@ class EditProfileScreen extends StatelessWidget {
                           color: Colors.white,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.camera_alt, size: 18),
+                        child: GestureDetector(
+                          onTap: () async {
+                            final imageUrl =
+                                await CloudinaryService.pickAndUploadImage();
+                            if (imageUrl != null) {
+                              setState(() => avatarUrl = imageUrl);
+                            }
+                          },
+                          child: Stack(
+                            alignment: Alignment.bottomRight,
+                            children: [
+                              CircleAvatar(
+                                radius: 50,
+                                backgroundImage: avatarUrl != null
+                                    ? NetworkImage(avatarUrl!)
+                                    : const AssetImage(
+                                            'assets/images/banner2.png',
+                                          )
+                                          as ImageProvider,
+                              ),
+                              const CircleAvatar(
+                                radius: 16,
+                                child: Icon(Icons.camera_alt, size: 16),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -74,13 +120,17 @@ class EditProfileScreen extends StatelessWidget {
 
                   _ProfileField(label: 'Username', value: 'Ava Michel'),
                   _ProfileField(label: 'Email', value: 'avamichel@gmail.com'),
-                  _ProfileField(label: 'Phone Number', value: '+256-6847839'),
-                  _ProfileField(label: 'Date of birth', value: '10/12/2000'),
 
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
                       // Simpan perubahan profil
+                      AuthController().updateProfile(
+                        context: context,
+                        ref: ref,
+                        fullname: nameController.text,
+                        avatar: avatarUrl,
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       // backgroundColor: const Color(0xFF8B0000),

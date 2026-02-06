@@ -5,37 +5,37 @@ class User {
   final String fullname;
   final String email;
   final String token;
+  final String? avatar;
 
   User({
     required this.id,
     required this.fullname,
     required this.email,
     required this.token,
+    this.avatar,
   });
 
-  /// Convert User object to Map (for storage / usage)
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{
+    return {
       '_id': id,
       'fullname': fullname,
       'email': email,
       'token': token,
+      'avatar': avatar,
     };
   }
 
-  /// Convert User object to JSON string
   String toJson() => jsonEncode(toMap());
 
-  /// Create User object from Map (API response)
   factory User.fromMap(Map<String, dynamic> map) {
     return User(
       id: map['_id'] ?? '',
       fullname: map['fullname'] ?? '',
       email: map['email'] ?? '',
       token: map['token'] ?? '',
+      avatar: map['avatar'], // boleh null
     );
   }
 
-  /// Create User object from JSON string
   factory User.fromJson(String source) => User.fromMap(jsonDecode(source));
 }

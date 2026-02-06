@@ -191,6 +191,7 @@ class BottomSheetPreviewDocument extends StatelessWidget {
 
                                 // 🔥 INI YANG WAJIB
                                 Navigator.pop(
+                                  // ignore: use_build_context_synchronously
                                   context,
                                   true,
                                 ); // TUTUP BOTTOMSHEET + KIRIM RESULT

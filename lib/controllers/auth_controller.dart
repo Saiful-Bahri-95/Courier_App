@@ -115,4 +115,42 @@ class AuthController {
       showSnackbar(context, 'Error during logout');
     }
   }
+
+  Future<void> updateProfile({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String fullname,
+    String? avatar,
+  }) async {
+    try {
+      final user = ref.read(userProvider);
+
+      final response = await http.patch(
+        Uri.parse('${ApiConfig.baseUrl}/api/user/profile'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${user!.token}',
+        },
+        body: jsonEncode({'fullname': fullname, 'avatar': avatar}),
+      );
+
+      manageHttpResponse(
+        response: response,
+        // ignore: use_build_context_synchronously
+        context: context,
+        onSuccess: () {
+          final updatedUser = User.fromMap(jsonDecode(response.body));
+
+          ref.read(userProvider.notifier).setUser(updatedUser);
+          AuthSecureStorage.saveUser(updatedUser);
+
+          showSnackbar(context, 'Profile updated');
+          Navigator.pop(context);
+        },
+      );
+    } catch (e) {
+      // ignore: use_build_context_synchronously
+      showSnackbar(context, 'Update failed');
+    }
+  }
 }

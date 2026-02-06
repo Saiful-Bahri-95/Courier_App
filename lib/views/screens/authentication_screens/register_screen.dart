@@ -20,6 +20,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String fullname = '';
 
   bool _isLoading = false;
+  bool _obscure = true;
 
   registerUser() async {
     setState(() => _isLoading = true);
@@ -162,7 +163,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 5),
                   TextFormField(
-                    obscureText: true,
+                    obscureText: _obscure,
                     onChanged: (value) => password = value,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -173,10 +174,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       }
                       return null;
                     },
-                    decoration: _inputDecoration(
-                      hintText: 'Enter your password',
-                      iconPath: 'assets/icons/password.png',
-                    ).copyWith(suffixIcon: const Icon(Icons.visibility)),
+                    decoration:
+                        _inputDecoration(
+                          hintText: 'Enter your password',
+                          iconPath: 'assets/icons/password.png',
+                        ).copyWith(
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscure
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscure = !_obscure;
+                              });
+                            },
+                          ),
+                        ),
                   ),
 
                   const SizedBox(height: 30),

@@ -6,6 +6,7 @@ import 'package:store_app/services/cloudinary_service.dart';
 import 'package:store_app/services/document_service.dart';
 import 'package:store_app/services/manage_http_response.dart';
 import 'package:store_app/views/screens/main_screen.dart';
+import 'package:store_app/views/screens/utils.dart';
 
 class PreviewDocumentScreen extends StatelessWidget {
   final DocumentData? documentData;
@@ -53,68 +54,119 @@ class PreviewDocumentScreen extends StatelessWidget {
 
   Widget _buildPreview(BuildContext context, DocumentData data) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Preview Dokumen")),
+      appBar: AppBar(
+        title: Text(
+          'Preview Document',
+          style: TextStyle(
+            fontSize: 25,
+            color: Color(0xFF030F2F),
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.01,
+          ),
+        ),
+      ),
 
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _section("Pengirim", [
+            _section("Detail Pengirim", [
               _item("Perusahaan", data.senderCompany),
               _item("Nama Pengirim", data.senderName),
               _item("Telepon", data.senderPhone),
-            ]),
+            ], gradient: AppGradients.sender),
 
-            _section("Dokumen", [
-              _item("Jenis Dokumen", data.documentType),
-              _item("Deskripsi", data.description),
-            ]),
-
-            _section("Penerima", [
+            _section("Detail Penerima", [
               _item("Perusahaan", data.receiverCompany),
               _item("Nama", data.receiverName),
               _item("Telepon", data.receiverPhone),
-            ]),
+            ], gradient: AppGradients.sender),
+
+            _section("Dokumen", [
+              _item("Jenis Dokumen", data.documentType),
+              Container(
+                width: double.infinity, // ✅ penuh
+                constraints: const BoxConstraints(minHeight: 120),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'Description :\n${data.description ?? "-"}',
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ),
+            ], gradient: AppGradients.document),
 
             if (data.receiverImage != null || data.receiverImageUrl != null)
-              _section("Foto Penerima", [_receiverImagePreview(data)]),
+              _section("Foto Penerima", [
+                _receiverImagePreview(data),
+              ], gradient: AppGradients.document),
 
             _section("Tanda Tangan", [
               _item("Tanggal", _formatDateTime(data.receivedDate)),
               _item("Nama", data.signedName),
-            ]),
+            ], gradient: AppGradients.document),
 
             if (data.signature != null || data.signatureUrl != null)
-              _section("Preview Tanda Tangan", [_signaturePreview(data)]),
+              _section("Preview Tanda Tangan", [
+                _signaturePreview(data),
+              ], gradient: AppGradients.document),
 
-            const SizedBox(height: 100), // ruang buat tombol bawah
+            const SizedBox(height: 10),
+            _submitButton(context), // ruang buat tombol bawah
           ],
         ),
       ),
 
       // 🔥 PINDAHKAN SUBMIT KE SINI
-      bottomNavigationBar: documentId == null ? _submitButton(context) : null,
     );
   }
 
   // ===== UI Helpers =====
 
-  Widget _section(String title, List<Widget> children) {
-    return Card(
+  Widget _section(
+    String title,
+    List<Widget> children, {
+    required Gradient gradient,
+  }) {
+    return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            ...children,
-          ],
+      decoration: BoxDecoration(
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            // ignore: deprecated_member_use
+            color: Colors.black.withOpacity(0.9),
+            blurRadius: 5,
+            offset: const Offset(4, 4),
+          ),
+        ],
+      ),
+      child: Card(
+        color: Colors.transparent,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white, // 🔥
+                ),
+              ),
+              const SizedBox(height: 12),
+              ...children,
+            ],
+          ),
         ),
       ),
     );
@@ -126,21 +178,19 @@ class PreviewDocumentScreen extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Label
           SizedBox(
-            width: 120, // 🔥 bikin semua label sejajar
-            child: Text(label, style: const TextStyle(color: Colors.black)),
+            width: 120,
+            child: Text(label, style: const TextStyle(color: Colors.white70)),
           ),
-
-          // Separator ( : atau = )
           const SizedBox(
             width: 10,
-            child: Text(":", style: TextStyle(color: Colors.grey)),
+            child: Text(":", style: TextStyle(color: Colors.white54)),
           ),
-
-          // Value
           Expanded(
-            child: Text(value ?? "-", style: const TextStyle(fontSize: 15)),
+            child: Text(
+              value ?? "-",
+              style: const TextStyle(fontSize: 15, color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -152,7 +202,13 @@ class PreviewDocumentScreen extends StatelessWidget {
     if (data.receiverImage != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(12),
-        child: Image.file(data.receiverImage!, height: 200, fit: BoxFit.cover),
+
+        child: Image.file(
+          data.receiverImage!,
+          height: 200,
+          width: double.infinity,
+          fit: BoxFit.cover,
+        ),
       );
     }
 
@@ -163,6 +219,7 @@ class PreviewDocumentScreen extends StatelessWidget {
         child: Image.network(
           data.receiverImageUrl!,
           height: 200,
+          width: double.infinity,
           fit: BoxFit.cover,
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
@@ -204,8 +261,8 @@ class PreviewDocumentScreen extends StatelessWidget {
   Widget _submitButton(context) {
     final isViewMode = documentId != null;
     return SizedBox(
+      height: 55,
       width: double.infinity,
-      height: 54,
       child: ElevatedButton(
         onPressed: isViewMode
             ? null
@@ -253,7 +310,18 @@ class PreviewDocumentScreen extends StatelessWidget {
                   showSnackbar(context, e.toString());
                 }
               },
-        child: Text(isViewMode ? "Dokumen Dikirim" : "Submit Dokumen"),
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.all(Colors.blueAccent),
+        ),
+
+        child: Text(
+          isViewMode ? "Dokumen Dikirim" : "Submit Dokumen",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
     );
   }
