@@ -83,8 +83,7 @@ class CloudinaryService {
 
       return data['secure_url'];
     } catch (e) {
-      print('Cloudinary upload error: $e');
-      return null;
+      throw Exception('Cloudinary upload error: $e');
     }
   }
 }

@@ -12,8 +12,6 @@ import 'package:store_app/views/screens/main_screen.dart';
 
 import '../services/manage_http_response.dart';
 
-final providerContainer = ProviderContainer();
-
 class AuthController {
   Future<void> signUpUser({
     required BuildContext context,
@@ -117,39 +115,42 @@ class AuthController {
   }
 
   Future<void> updateProfile({
-    required BuildContext context,
+    required context,
     required WidgetRef ref,
     required String fullname,
     String? avatar,
   }) async {
     try {
       final user = ref.read(userProvider);
+      if (user == null) return;
 
       final response = await http.patch(
-        Uri.parse('${ApiConfig.baseUrl}/api/user/profile'),
+        Uri.parse('${ApiConfig.baseUrl}/api/user/profile'), // ⬅️ FIX PATH
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${user!.token}',
+          'Authorization': 'Bearer ${user.token}',
         },
         body: jsonEncode({'fullname': fullname, 'avatar': avatar}),
       );
 
-      manageHttpResponse(
-        response: response,
-        // ignore: use_build_context_synchronously
-        context: context,
-        onSuccess: () {
-          final updatedUser = User.fromMap(jsonDecode(response.body));
+      print('UPDATE PROFILE STATUS: ${response.statusCode}');
+      print('UPDATE PROFILE BODY: ${response.body}');
 
-          ref.read(userProvider.notifier).setUser(updatedUser);
-          AuthSecureStorage.saveUser(updatedUser);
+      if (response.statusCode == 200) {
+        print('UPDATED USER RESPONSE: ${response.body}');
+        final updatedUser = User.fromMap(jsonDecode(response.body));
 
-          showSnackbar(context, 'Profile updated');
-          Navigator.pop(context);
-        },
-      );
+        // 🔥 update state
+        ref.read(userProvider.notifier).setUser(updatedUser);
+        await AuthSecureStorage.saveUser(updatedUser);
+
+        showSnackbar(context, 'Profile updated');
+        Navigator.pop(context); // ⬅️ SEKARANG PASTI BALIK
+      } else {
+        showSnackbar(context, 'Failed to update profile');
+      }
     } catch (e) {
-      // ignore: use_build_context_synchronously
+      print('UPDATE PROFILE ERROR: $e');
       showSnackbar(context, 'Update failed');
     }
   }

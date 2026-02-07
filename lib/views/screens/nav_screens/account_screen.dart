@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:store_app/controllers/auth_controller.dart';
+import 'package:store_app/provider/user_provider.dart';
 import 'package:store_app/views/screens/nav_screens/widgets/edit_profile_screen.dart';
 
 class AccountScreen extends ConsumerWidget {
@@ -11,6 +12,13 @@ class AccountScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(userProvider);
+
+    // ⛔ user null → berarti logout / belum login
+    if (user == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
       // backgroundColor: const Color(0xFF8B0000),
       backgroundColor: const Color(0xFFA79EFF),
@@ -43,27 +51,36 @@ class AccountScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               children: [
-                const CircleAvatar(
-                  radius: 28,
-                  backgroundImage: AssetImage('assets/images/banner2.png'),
-                  backgroundColor: Colors.white,
+                Container(
+                  padding: const EdgeInsets.all(2), // ketebalan border
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.teal, // warna border
+                  ),
+                  child: CircleAvatar(
+                    radius: 28,
+                    backgroundColor: Colors.white,
+                    backgroundImage:
+                        (user.avatar != null && user.avatar!.isNotEmpty)
+                        ? NetworkImage(user.avatar!)
+                        : const AssetImage('assets/images/banner2.png')
+                              as ImageProvider,
+                  ),
                 ),
                 const SizedBox(width: 14),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Ava Michel',
-                      style: GoogleFonts.getFont(
-                        'Poppins',
+                      user.fullname,
+                      style: GoogleFonts.poppins(
                         fontSize: 18,
-                        color: Color(0xFF030F2F),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     SizedBox(height: 2),
                     Text(
-                      'avamichel@gmail.com',
+                      user.email,
                       style: GoogleFonts.getFont(
                         'Poppins',
                         fontSize: 13,

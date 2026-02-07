@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:store_app/provider/user_provider.dart';
 
-class HeaderWidget extends StatelessWidget {
+class HeaderWidget extends ConsumerWidget {
   const HeaderWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final width = MediaQuery.of(context).size.width;
+    final user = ref.watch(userProvider);
 
     return SizedBox(
       width: width,
@@ -37,11 +40,8 @@ class HeaderWidget extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [
-                  // ignore: deprecated_member_use
-                  Colors.black.withOpacity(0.35),
-                  Colors.transparent,
-                ],
+                // ignore: deprecated_member_use
+                colors: [Colors.black.withOpacity(0.35), Colors.transparent],
               ),
             ),
           ),
@@ -76,46 +76,19 @@ class HeaderWidget extends StatelessWidget {
             ),
           ),
 
-          /// Action Icons
+          /// Header User Info
           Positioned(
             top: 40,
             left: 20,
             right: 20,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                /// Avatar + Name
                 Row(
                   children: [
-                    /// Foto Profil
-                    const CircleAvatar(
-                      radius: 22,
-                      backgroundImage: AssetImage(
-                        'assets/images/banner2.png', // ganti sesuai aset Anda
-                      ),
-                      backgroundColor: Colors.white,
-                    ),
-
+                    _UserAvatar(user: user),
                     const SizedBox(width: 12),
-
-                    /// Text Greeting
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          'Hi, Saiful Bahri',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 1),
-                        Text(
-                          'Good to see you again!',
-                          style: TextStyle(color: Colors.white70, fontSize: 12),
-                        ),
-                      ],
-                    ),
+                    _UserGreeting(user: user),
                   ],
                 ),
 
@@ -129,6 +102,63 @@ class HeaderWidget extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _UserAvatar extends StatelessWidget {
+  // ignore: prefer_typing_uninitialized_variables
+  final user;
+
+  const _UserAvatar({required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(2), // border thickness
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.teal, // border color
+      ),
+      child: CircleAvatar(
+        radius: 22,
+        backgroundColor: Colors.white,
+        backgroundImage:
+            (user != null && user.avatar != null && user.avatar!.isNotEmpty)
+            ? NetworkImage(
+                '${user.avatar}?v=${DateTime.now().millisecondsSinceEpoch}',
+              )
+            : const AssetImage('assets/images/banner2.png') as ImageProvider,
+      ),
+    );
+  }
+}
+
+class _UserGreeting extends StatelessWidget {
+  // ignore: prefer_typing_uninitialized_variables
+  final user;
+
+  const _UserGreeting({required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          user != null ? 'Hi, ${user.fullname}' : 'Hi!',
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 1),
+        const Text(
+          'Good to see you again!',
+          style: TextStyle(color: Colors.white70, fontSize: 12),
+        ),
+      ],
     );
   }
 }
@@ -153,7 +183,7 @@ class _ActionIcon extends StatelessWidget {
         child: SizedBox(
           width: 40,
           height: 40,
-          child: Icon(icon, color: Colors.black87),
+          child: Icon(icon, color: Colors.black87, size: 22),
         ),
       ),
     );

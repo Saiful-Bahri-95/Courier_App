@@ -37,7 +37,7 @@ class _SenderDetailState extends State<SenderDetail> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 20, top: 50, bottom: 15),
+            padding: const EdgeInsets.only(left: 20, top: 60, bottom: 15),
             child: Row(
               children: [
                 Text(
@@ -123,7 +123,7 @@ class _SenderDetailState extends State<SenderDetail> {
           const SizedBox(height: 16),
           _buildDropdown(),
           _buildNoteField(),
-          const SizedBox(height: 20),
+          Spacer(),
           _buildSubmitButton(),
         ],
       ),
@@ -204,7 +204,9 @@ class _SenderDetailState extends State<SenderDetail> {
   Widget _buildNoteField() {
     return TextFormField(
       controller: descCtrl,
-      maxLines: 3,
+      keyboardType: TextInputType.multiline, // 🔥 penting
+      maxLines: 5, // ⚠️ JANGAN null dulu
+      minLines: 3,
       decoration: InputDecoration(
         labelText: "Perihal / Desc",
         prefixIcon: const Icon(Icons.notes_sharp),

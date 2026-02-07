@@ -123,7 +123,7 @@ class _ReceiverDetailScreenState extends State<ReceiverDetailScreen> {
 
   Widget _buildFormCard() {
     return Container(
-      height: 670,
+      height: MediaQuery.of(context).size.height,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -168,6 +168,7 @@ class _ReceiverDetailScreenState extends State<ReceiverDetailScreen> {
           _buildImagePicker(),
 
           _buildFloatingBottomButton(),
+          Spacer(),
         ],
       ),
     );
