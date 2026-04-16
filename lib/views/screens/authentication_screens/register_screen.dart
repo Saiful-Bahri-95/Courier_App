@@ -1,40 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'login_screen.dart';
 import 'package:store_app/controllers/auth_controller.dart';
 
-import 'login_screen.dart';
-
-class RegisterScreen extends StatefulWidget {
+class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final AuthController _authController = AuthController();
 
   String email = '';
   String password = '';
   String fullname = '';
-
   bool _isLoading = false;
   bool _obscure = true;
 
-  registerUser() async {
+  // Kirim OTP dulu, bukan langsung register
+  Future<void> sendOtp() async {
     setState(() => _isLoading = true);
 
-    await _authController
-        .signUpUser(
-          context: context,
-          email: email,
-          fullname: fullname,
-          password: password,
-        )
-        .whenComplete(() {
-          setState(() => _isLoading = false);
-        });
+    await _authController.sendRegisterOtp(
+      context: context,
+      email: email,
+      fullname: fullname,
+      password: password,
+    );
+
+    setState(() => _isLoading = false);
   }
 
   InputDecoration _inputDecoration({
@@ -46,12 +44,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       fillColor: Colors.white,
       hintText: hintText,
       hintStyle: GoogleFonts.poppins(fontSize: 14),
-
       prefixIcon: Padding(
         padding: const EdgeInsets.all(10),
         child: Image.asset(iconPath, width: 20, height: 20),
       ),
-
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(20),
         borderSide: BorderSide.none,
@@ -93,16 +89,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     style: GoogleFonts.lato(color: Colors.white),
                   ),
                   const SizedBox(height: 20),
-
                   Image.asset(
                     'assets/images/banner2.png',
                     width: 150,
                     height: 150,
                   ),
-
                   const SizedBox(height: 20),
 
-                  /// EMAIL
                   Align(
                     alignment: Alignment.topLeft,
                     child: Text(
@@ -116,8 +109,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 5),
                   TextFormField(
                     onChanged: (value) => email = value,
-                    validator: (value) =>
-                        value!.isEmpty ? 'Please enter your email' : null,
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Email wajib diisi';
+                      }
+                      if (!RegExp(
+                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                      ).hasMatch(value)) {
+                        return 'Format email tidak valid';
+                      }
+                      return null;
+                    },
                     decoration: _inputDecoration(
                       hintText: 'Enter your email',
                       iconPath: 'assets/icons/email.png',
@@ -125,8 +128,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
 
                   const SizedBox(height: 20),
-
-                  /// FULL NAME
                   Align(
                     alignment: Alignment.topLeft,
                     child: Text(
@@ -141,7 +142,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextFormField(
                     onChanged: (value) => fullname = value,
                     validator: (value) =>
-                        value!.isEmpty ? 'Please enter your full name' : null,
+                        value!.isEmpty ? 'Nama lengkap wajib diisi' : null,
                     decoration: _inputDecoration(
                       hintText: 'Enter your full name',
                       iconPath: 'assets/icons/user.jpeg',
@@ -149,8 +150,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
 
                   const SizedBox(height: 20),
-
-                  /// PASSWORD
                   Align(
                     alignment: Alignment.topLeft,
                     child: Text(
@@ -167,10 +166,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     onChanged: (value) => password = value,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Password is required';
+                        return 'Password wajib diisi';
                       }
                       if (value.length < 8) {
-                        return 'Password must be at least 8 characters';
+                        return 'Password minimal 8 karakter';
                       }
                       return null;
                     },
@@ -185,22 +184,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   ? Icons.visibility
                                   : Icons.visibility_off,
                             ),
-                            onPressed: () {
-                              setState(() {
-                                _obscure = !_obscure;
-                              });
-                            },
+                            onPressed: () =>
+                                setState(() => _obscure = !_obscure),
                           ),
                         ),
                   ),
 
                   const SizedBox(height: 30),
-
-                  /// BUTTON
                   InkWell(
                     onTap: () {
                       if (_formKey.currentState!.validate()) {
-                        registerUser();
+                        sendOtp(); // ← kirim OTP dulu
                       }
                     },
                     child: Container(
@@ -240,14 +234,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
                       InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const LoginScreen(),
-                            ),
-                          );
-                        },
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LoginScreen(),
+                          ),
+                        ),
                         child: Text(
                           ' Sign In',
                           style: GoogleFonts.roboto(

@@ -8,45 +8,47 @@ import 'package:store_app/models/user.dart';
 import 'package:store_app/provider/user_provider.dart';
 import 'package:store_app/services/auth_secure_storage.dart';
 import 'package:store_app/views/screens/authentication_screens/login_screen.dart';
+import 'package:store_app/views/screens/authentication_screens/register_otp_screen.dart';
 import 'package:store_app/views/screens/main_screen.dart';
 
 import '../services/manage_http_response.dart';
 
 class AuthController {
-  Future<void> signUpUser({
-    required BuildContext context,
-    required String email,
-    required String fullname,
-    required String password,
-  }) async {
-    try {
-      http.Response response = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/api/signup'),
-        headers: const {'Content-Type': 'application/json; charset=UTF-8'},
-        body: jsonEncode({
-          'fullname': fullname,
-          'email': email,
-          'password': password,
-        }),
-      );
+  //signup user function
+  // Future<void> signUpUser({
+  //   required BuildContext context,
+  //   required String email,
+  //   required String fullname,
+  //   required String password,
+  // }) async {
+  //   try {
+  //     http.Response response = await http.post(
+  //       Uri.parse('${ApiConfig.baseUrl}/api/signup'),
+  //       headers: const {'Content-Type': 'application/json; charset=UTF-8'},
+  //       body: jsonEncode({
+  //         'fullname': fullname,
+  //         'email': email,
+  //         'password': password,
+  //       }),
+  //     );
 
-      manageHttpResponse(
-        response: response,
-        // ignore: use_build_context_synchronously
-        context: context,
-        onSuccess: () {
-          showSnackbar(context, 'Account has been created');
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const LoginScreen()),
-          );
-        },
-      );
-    } catch (e) {
-      // ignore: use_build_context_synchronously
-      showSnackbar(context, 'Server error');
-    }
-  }
+  //     manageHttpResponse(
+  //       response: response,
+  //       // ignore: use_build_context_synchronously
+  //       context: context,
+  //       onSuccess: () {
+  //         showSnackbar(context, 'Account has been created');
+  //         Navigator.pushReplacement(
+  //           context,
+  //           MaterialPageRoute(builder: (_) => const LoginScreen()),
+  //         );
+  //       },
+  //     );
+  //   } catch (e) {
+  //     // ignore: use_build_context_synchronously
+  //     showSnackbar(context, 'Server error');
+  //   }
+  // }
 
   //signin user function
   Future<void> signInUser({
@@ -92,6 +94,89 @@ class AuthController {
     }
   }
 
+  // ========================
+  // SEND REGISTER OTP
+  // ========================
+  Future<void> sendRegisterOtp({
+    required BuildContext context,
+    required String email,
+    required String fullname,
+    required String password,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${ApiConfig.baseUrl}/api/send-register-otp'),
+        headers: const {'Content-Type': 'application/json; charset=UTF-8'},
+        body: jsonEncode({'email': email}),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        Navigator.push(
+          // ignore: use_build_context_synchronously
+          context,
+          MaterialPageRoute(
+            builder: (_) => RegisterOtpScreen(
+              email: email,
+              fullname: fullname,
+              password: password,
+            ),
+          ),
+        );
+      } else {
+        // ignore: use_build_context_synchronously
+        showSnackbar(context, data['message'] ?? 'Gagal kirim OTP');
+      }
+    } catch (e) {
+      // ignore: use_build_context_synchronously
+      showSnackbar(context, 'Server error');
+    }
+  }
+
+  // ========================
+  // VERIFY REGISTER OTP + BUAT AKUN
+  // ========================
+  Future<void> verifyRegisterOtp({
+    required BuildContext context,
+    required String email,
+    required String fullname,
+    required String password,
+    required String otp,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${ApiConfig.baseUrl}/api/verify-register-otp'),
+        headers: const {'Content-Type': 'application/json; charset=UTF-8'},
+        body: jsonEncode({
+          'email': email,
+          'fullname': fullname,
+          'password': password,
+          'otp': otp,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 201) {
+        // ignore: use_build_context_synchronously
+        showSnackbar(context, 'Akun berhasil dibuat! Silakan login.');
+        Navigator.pushAndRemoveUntil(
+          // ignore: use_build_context_synchronously
+          context,
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (route) => false,
+        );
+      } else {
+        // ignore: use_build_context_synchronously
+        showSnackbar(context, data['message'] ?? 'OTP salah');
+      }
+    } catch (e) {
+      // ignore: use_build_context_synchronously
+      showSnackbar(context, 'Server error');
+    }
+  }
+
   // LOGOUT BERSIH
   Future<void> signOutUser({required context, required WidgetRef ref}) async {
     try {
@@ -133,11 +218,7 @@ class AuthController {
         body: jsonEncode({'fullname': fullname, 'avatar': avatar}),
       );
 
-      print('UPDATE PROFILE STATUS: ${response.statusCode}');
-      print('UPDATE PROFILE BODY: ${response.body}');
-
       if (response.statusCode == 200) {
-        print('UPDATED USER RESPONSE: ${response.body}');
         final updatedUser = User.fromMap(jsonDecode(response.body));
 
         // 🔥 update state
@@ -150,7 +231,6 @@ class AuthController {
         showSnackbar(context, 'Failed to update profile');
       }
     } catch (e) {
-      print('UPDATE PROFILE ERROR: $e');
       showSnackbar(context, 'Update failed');
     }
   }

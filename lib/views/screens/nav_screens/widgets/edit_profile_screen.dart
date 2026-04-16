@@ -87,7 +87,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                             GestureDetector(
                               onTap: () async {
                                 final imageUrl =
-                                    await CloudinaryService.pickAndUploadImage();
+                                    await UploadService.pickAndUploadImage(
+                                      token: ref.read(userProvider)!.token,
+                                    );
                                 if (imageUrl != null) {
                                   setState(() => avatarUrl = imageUrl);
                                 }

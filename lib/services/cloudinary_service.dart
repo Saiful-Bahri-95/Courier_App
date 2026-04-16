@@ -3,87 +3,60 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:store_app/config/globar_variable.dart';
 
-class CloudinaryService {
-  static const String cloudName = "dc9sx4cot";
-  static const String uploadPreset = "u5p17ded";
+class UploadService {
+  /// 📸 Pick image (gallery / camera) lalu upload ke backend
+  static Future<String?> pickAndUploadImage({
+    required String token,
+    ImageSource source = ImageSource.gallery,
+  }) async {
+    final picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: source);
 
-  /// Upload File (receiver image)
-  static Future<String> uploadFile(File file) async {
-    final uri = Uri.parse(
-      "https://api.cloudinary.com/v1_1/$cloudName/image/upload",
-    );
+    if (image == null) return null;
 
-    final request = http.MultipartRequest("POST", uri)
-      ..fields['upload_preset'] = uploadPreset
-      ..files.add(await http.MultipartFile.fromPath('file', file.path));
-
-    final response = await request.send().timeout(
-      Duration(seconds: 20),
-      onTimeout: () {
-        throw Exception("Upload timed out");
-      },
-    );
-
-    final body = await response.stream.bytesToString();
-
-    if (response.statusCode != 200 && response.statusCode != 201) {
-      throw Exception(
-        "Upload image gagal: ${jsonDecode(body)['error']?['message'] ?? body}",
-      );
-    }
-
-    return jsonDecode(body)['secure_url'];
+    final file = File(image.path);
+    return uploadImageFile(file, token);
   }
 
-  /// Upload Signature (Uint8List)
-  static Future<String> uploadBytes(Uint8List bytes) async {
-    final uri = Uri.parse(
-      "https://api.cloudinary.com/v1_1/$cloudName/image/upload",
-    );
+  /// 🖼️ Upload image FILE (gallery / camera / document)
+  static Future<String> uploadImageFile(File file, String token) async {
+    final uri = Uri.parse('${ApiConfig.baseUrl}/api/upload/image');
 
-    final request = http.MultipartRequest("POST", uri)
-      ..fields['upload_preset'] = uploadPreset
-      ..files.add(
-        http.MultipartFile.fromBytes('file', bytes, filename: "signature.png"),
-      );
+    final request = http.MultipartRequest('POST', uri)
+      ..headers['Authorization'] = 'Bearer $token'
+      ..files.add(await http.MultipartFile.fromPath('file', file.path));
 
     final response = await request.send();
     final body = await response.stream.bytesToString();
 
-    if (response.statusCode != 200 && response.statusCode != 201) {
-      throw Exception(
-        "Upload signature gagal: ${jsonDecode(body)['error']?['message'] ?? body}",
-      );
+    if (response.statusCode != 200) {
+      throw Exception('Upload image failed');
     }
 
-    return jsonDecode(body)['secure_url'];
+    return jsonDecode(body)['url'];
   }
 
-  static Future<String?> pickAndUploadImage() async {
-    try {
-      final picker = ImagePicker();
-      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+  /// ✍️ Upload SIGNATURE (Uint8List)
+  static Future<String> uploadSignature(Uint8List bytes, String token) async {
+    final uri = Uri.parse('${ApiConfig.baseUrl}/api/upload/signature');
 
-      if (image == null) return null;
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'imageBase64': 'data:image/png;base64,${base64Encode(bytes)}',
+      }),
+    );
 
-      final file = File(image.path);
-
-      final uri = Uri.parse(
-        'https://api.cloudinary.com/v1_1/$cloudName/image/upload',
-      );
-
-      final request = http.MultipartRequest('POST', uri)
-        ..fields['upload_preset'] = uploadPreset
-        ..files.add(await http.MultipartFile.fromPath('file', file.path));
-
-      final response = await request.send();
-      final responseData = await response.stream.bytesToString();
-      final data = jsonDecode(responseData);
-
-      return data['secure_url'];
-    } catch (e) {
-      throw Exception('Cloudinary upload error: $e');
+    if (response.statusCode != 200) {
+      throw Exception('Upload signature failed');
     }
+
+    return jsonDecode(response.body)['url'];
   }
 }

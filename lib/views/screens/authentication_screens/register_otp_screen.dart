@@ -1,49 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:store_app/config/globar_variable.dart';
-import 'package:store_app/services/manage_http_response.dart';
-import 'otp_screen.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:store_app/controllers/auth_controller.dart';
 
-class ForgotPasswordScreen extends StatefulWidget {
-  const ForgotPasswordScreen({super.key});
+class RegisterOtpScreen extends StatefulWidget {
+  final String email;
+  final String fullname;
+  final String password;
+
+  const RegisterOtpScreen({
+    super.key,
+    required this.email,
+    required this.fullname,
+    required this.password,
+  });
 
   @override
-  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+  State<RegisterOtpScreen> createState() => _RegisterOtpScreenState();
 }
 
-class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+class _RegisterOtpScreenState extends State<RegisterOtpScreen> {
   final _formKey = GlobalKey<FormState>();
-  String email = '';
+  final AuthController _authController = AuthController();
+  String otp = '';
   bool _isLoading = false;
 
-  Future<void> sendOtp() async {
+  Future<void> verifyOtp() async {
     setState(() => _isLoading = true);
 
-    try {
-      final res = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/api/forgot-password'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email}),
-      );
-
-      final data = jsonDecode(res.body);
-
-      if (res.statusCode == 200) {
-        Navigator.push(
-          // ignore: use_build_context_synchronously
-          context,
-          MaterialPageRoute(builder: (context) => OtpScreen(email: email)),
-        );
-      } else {
-        // ignore: use_build_context_synchronously
-        showSnackbar(context, data['message'] ?? 'Failed to send OTP');
-      }
-    } catch (e) {
-      // ignore: use_build_context_synchronously
-      showSnackbar(context, 'Gagal terhubung ke server');
-    }
+    await _authController.verifyRegisterOtp(
+      context: context,
+      email: widget.email,
+      fullname: widget.fullname,
+      password: widget.password,
+      otp: otp,
+    );
 
     setState(() => _isLoading = false);
   }
@@ -67,7 +57,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Forgot Password? 🔐',
+                    'Verify Your Email 📧',
                     style: GoogleFonts.poppins(
                       fontSize: 23,
                       color: Colors.white,
@@ -76,7 +66,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Enter your email to receive an OTP code',
+                    'OTP code has been sent to\n${widget.email}',
                     style: GoogleFonts.lato(color: Colors.white70),
                     textAlign: TextAlign.center,
                   ),
@@ -84,7 +74,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   Align(
                     alignment: Alignment.topLeft,
                     child: Text(
-                      'Email',
+                      'OTP Code',
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
@@ -93,25 +83,25 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   ),
                   const SizedBox(height: 5),
                   TextFormField(
-                    onChanged: (value) => email = value,
+                    keyboardType: TextInputType.number,
+                    maxLength: 6,
+                    onChanged: (value) => otp = value,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your email';
+                        return 'OTP wajib diisi';
                       }
+                      if (value.length < 6) return 'OTP harus 6 digit';
                       return null;
                     },
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.white,
-                      hintText: 'Enter your email',
+                      hintText: 'Enter 6-digit OTP',
                       hintStyle: GoogleFonts.poppins(fontSize: 14),
-                      prefixIcon: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Image.asset(
-                          'assets/icons/email.png',
-                          width: 20,
-                          height: 20,
-                        ),
+                      counterText: '',
+                      prefixIcon: const Icon(
+                        Icons.lock_outline,
+                        color: Colors.grey,
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
@@ -130,7 +120,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   InkWell(
                     onTap: () {
                       if (_formKey.currentState!.validate()) {
-                        sendOtp();
+                        verifyOtp();
                       }
                     },
                     child: Container(
@@ -151,13 +141,27 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 color: Colors.white,
                               )
                             : Text(
-                                'Send OTP',
+                                'Verify & Create Account',
                                 style: GoogleFonts.lato(
                                   color: Colors.white,
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Resend OTP
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // kembali ke register
+                    },
+                    child: Text(
+                      'Didn\'t receive OTP? Go back',
+                      style: GoogleFonts.poppins(
+                        color: const Color.fromARGB(255, 255, 0, 0),
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),

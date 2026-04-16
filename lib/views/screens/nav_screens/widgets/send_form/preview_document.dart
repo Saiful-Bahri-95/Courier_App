@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:store_app/models/document_data.dart';
 import 'package:intl/intl.dart';
 import 'package:store_app/models/document_detail_model.dart';
+import 'package:store_app/provider/user_provider.dart';
 import 'package:store_app/services/cloudinary_service.dart';
 import 'package:store_app/services/document_service.dart';
 import 'package:store_app/services/manage_http_response.dart';
 import 'package:store_app/views/screens/main_screen.dart';
 import 'package:store_app/views/screens/utils.dart';
 
-class PreviewDocumentScreen extends StatelessWidget {
+class PreviewDocumentScreen extends ConsumerStatefulWidget {
   final DocumentData? documentData;
   final String? documentId;
 
@@ -18,6 +20,12 @@ class PreviewDocumentScreen extends StatelessWidget {
     this.documentId,
   });
 
+  @override
+  ConsumerState<PreviewDocumentScreen> createState() =>
+      _PreviewDocumentScreenState();
+}
+
+class _PreviewDocumentScreenState extends ConsumerState<PreviewDocumentScreen> {
   String _formatDateTime(DateTime? date) {
     if (date == null) return "-";
     return DateFormat('EEEE, d/MM/y, HH:mm:ss').format(date);
@@ -26,13 +34,13 @@ class PreviewDocumentScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // MODE CREATE / PREVIEW
-    if (documentData != null) {
-      return _buildPreview(context, documentData!);
+    if (widget.documentData != null) {
+      return _buildPreview(context, widget.documentData!);
     }
 
     // MODE VIEW / DETAIL (FETCH API)
     return FutureBuilder<DocumentDetailModel>(
-      future: DocumentService.getDocumentDetail(documentId!),
+      future: DocumentService.getDocumentDetail(widget.documentId!),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
@@ -126,7 +134,6 @@ class PreviewDocumentScreen extends StatelessWidget {
   }
 
   // ===== UI Helpers =====
-
   Widget _section(
     String title,
     List<Widget> children, {
@@ -259,7 +266,8 @@ class PreviewDocumentScreen extends StatelessWidget {
   }
 
   Widget _submitButton(context) {
-    final isViewMode = documentId != null;
+    final isViewMode = widget.documentId != null;
+
     return SizedBox(
       height: 55,
       width: double.infinity,
@@ -267,7 +275,17 @@ class PreviewDocumentScreen extends StatelessWidget {
         onPressed: isViewMode
             ? null
             : () async {
-                // 🔒 Tampilkan loading
+                // 🔥 AMBIL USER DARI RIVERPOD
+                final user = ref.read(userProvider);
+
+                if (user == null) {
+                  showSnackbar(context, 'User belum login');
+                  return;
+                }
+
+                final token = user.token;
+
+                // 🔒 loading
                 showDialog(
                   context: context,
                   barrierDismissible: false,
@@ -278,26 +296,30 @@ class PreviewDocumentScreen extends StatelessWidget {
                 try {
                   // 1️⃣ Upload receiver image
                   String? receiverImageUrl;
-                  if (documentData?.receiverImage != null) {
-                    receiverImageUrl = await CloudinaryService.uploadFile(
-                      documentData!.receiverImage!,
+                  if (widget.documentData?.receiverImage != null) {
+                    receiverImageUrl = await UploadService.uploadImageFile(
+                      widget.documentData!.receiverImage!,
+                      token,
                     );
                   }
 
                   // 2️⃣ Upload signature
                   String? signatureUrl;
-                  if (documentData?.signature != null) {
-                    signatureUrl = await CloudinaryService.uploadBytes(
-                      documentData?.signature!,
+                  if (widget.documentData?.signature != null) {
+                    signatureUrl = await UploadService.uploadSignature(
+                      widget.documentData!.signature!,
+                      token,
                     );
                   }
 
-                  // 3️⃣ Kirim data ke API
+                  // 3️⃣ Submit ke backend
                   await DocumentService.submit(
-                    documentData!,
+                    widget.documentData!,
                     receiverImageUrl,
                     signatureUrl,
                   );
+
+                  Navigator.pop(context); // 🔥 tutup loading
 
                   showSnackbar(context, 'Dokumen berhasil dikirim');
 
@@ -307,16 +329,16 @@ class PreviewDocumentScreen extends StatelessWidget {
                     (route) => false,
                   );
                 } catch (e) {
+                  Navigator.pop(context); // 🔥 WAJIB tutup loading saat error
                   showSnackbar(context, e.toString());
                 }
               },
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.all(Colors.blueAccent),
         ),
-
         child: Text(
           isViewMode ? "Dokumen Dikirim" : "Submit Dokumen",
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.bold,

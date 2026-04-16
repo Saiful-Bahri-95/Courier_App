@@ -83,10 +83,29 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     }
 
                     if (snapshot.hasError) {
+                      final err = snapshot.error.toString();
+                      final isNetworkError =
+                          err.contains('SocketException') ||
+                          err.contains('Failed host lookup');
                       return Center(
-                        child: Text(
-                          snapshot.error.toString(),
-                          style: const TextStyle(color: Colors.red),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.wifi_off, size: 60, color: Colors.grey),
+                            SizedBox(height: 12),
+                            Text(
+                              isNetworkError
+                                  ? 'Tidak dapat terhubung ke server.\nPeriksa koneksi internet Anda.'
+                                  : 'Terjadi kesalahan. Coba lagi.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.red),
+                            ),
+                            SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () => setState(() => _loadDocuments()),
+                              child: Text('Coba Lagi'),
+                            ),
+                          ],
                         ),
                       );
                     }

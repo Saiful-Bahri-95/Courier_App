@@ -31,16 +31,23 @@ class _SenderDetailState extends State<SenderDetail> {
 
   @override
   Widget build(BuildContext context) {
+    final topPadding = MediaQuery.of(context).padding.top;
+
     return Scaffold(
+      resizeToAvoidBottomInset: true, // ✅ tombol tidak tertutup keyboard
       backgroundColor: const Color(0xFFA79EFF),
-      // backgroundColor: Color(0xFFD25353),
       body: Column(
         children: [
+          // ✅ Header responsif
           Padding(
-            padding: const EdgeInsets.only(left: 20, top: 60, bottom: 15),
+            padding: EdgeInsets.only(
+              left: 20,
+              top: topPadding + 20,
+              bottom: 15,
+            ),
             child: Row(
               children: [
-                Text(
+                const Text(
                   'Send Document',
                   style: TextStyle(
                     fontSize: 25,
@@ -53,78 +60,74 @@ class _SenderDetailState extends State<SenderDetail> {
             ),
           ),
 
+          // ✅ Container putih mengisi sisa layar, scroll di dalamnya
           Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.only(top: 20),
+            child: Container(
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 30,
+                    offset: Offset(0, 10),
+                  ),
+                ],
+              ),
               child: Form(
                 key: _formKey,
-                child: Column(children: [_buildFormCard()]),
+                child: SingleChildScrollView(
+                  // ✅ scroll di dalam container, bukan di luar
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Detail Pengirim",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1E293B),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildInputField(
+                        label: "Nama Perusahaan",
+                        icon: Icons.business,
+                        controller: companyCtrl,
+                      ),
+                      _buildInputField(
+                        label: "Nama Pengirim",
+                        icon: Icons.person,
+                        controller: senderCtrl,
+                      ),
+                      _buildInputField(
+                        label: "Nomor Telepon",
+                        icon: Icons.phone,
+                        keyboardType: TextInputType.phone,
+                        controller: phoneCtrl,
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        "Jenis & Deskripsi Dokumen",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1E293B),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildDropdown(),
+                      _buildNoteField(),
+                      const SizedBox(height: 24),
+                      _buildSubmitButton(), // ✅ tidak pakai Spacer
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFormCard() {
-    return Container(
-      height: 630,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-        boxShadow: [
-          BoxShadow(
-            // ignore: deprecated_member_use
-            color: Colors.black.withOpacity(0.7),
-            blurRadius: 30,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Detail Pengirim",
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1E293B),
-            ),
-          ),
-          const SizedBox(height: 16),
-          _buildInputField(
-            label: "Nama Perusahaan",
-            icon: Icons.business,
-            controller: companyCtrl,
-          ),
-          _buildInputField(
-            label: "Nama Pengirim",
-            icon: Icons.person,
-            controller: senderCtrl,
-          ),
-          _buildInputField(
-            label: "Nomor Telepon",
-            icon: Icons.phone,
-            keyboardType: TextInputType.phone,
-            controller: phoneCtrl,
-          ),
-          SizedBox(height: 16),
-          Text(
-            "Jenis & Deskripsi Dokumen",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1E293B),
-            ),
-          ),
-          const SizedBox(height: 16),
-          _buildDropdown(),
-          _buildNoteField(),
-          Spacer(),
-          _buildSubmitButton(),
         ],
       ),
     );
@@ -148,15 +151,23 @@ class _SenderDetailState extends State<SenderDetail> {
           fillColor: const Color(0xFFF8FAFC),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: Colors.grey),
+            borderSide: const BorderSide(color: Colors.grey),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: const BorderSide(color: Colors.black, width: 2),
           ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Colors.red),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Colors.red, width: 2),
+          ),
         ),
         validator: (value) {
-          if (value == null || value.isEmpty) {
+          if (value == null || value.trim().isEmpty) {
             return "$label wajib diisi";
           }
           return null;
@@ -176,14 +187,22 @@ class _SenderDetailState extends State<SenderDetail> {
           fillColor: const Color(0xFFF8FAFC),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: Colors.grey),
+            borderSide: const BorderSide(color: Colors.grey),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: const BorderSide(color: Colors.black, width: 2),
           ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Colors.red),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Colors.red, width: 2),
+          ),
         ),
-        initialValue: selectedDocumentType,
+        value: selectedDocumentType,
         items: const [
           DropdownMenuItem(value: "Document", child: Text("Document")),
           DropdownMenuItem(value: "Invoice", child: Text("Invoice")),
@@ -204,8 +223,8 @@ class _SenderDetailState extends State<SenderDetail> {
   Widget _buildNoteField() {
     return TextFormField(
       controller: descCtrl,
-      keyboardType: TextInputType.multiline, // 🔥 penting
-      maxLines: 5, // ⚠️ JANGAN null dulu
+      keyboardType: TextInputType.multiline,
+      maxLines: 5,
       minLines: 3,
       decoration: InputDecoration(
         labelText: "Perihal / Desc",
@@ -214,7 +233,7 @@ class _SenderDetailState extends State<SenderDetail> {
         fillColor: const Color(0xFFF8FAFC),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: Colors.grey),
+          borderSide: const BorderSide(color: Colors.grey),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
@@ -229,11 +248,11 @@ class _SenderDetailState extends State<SenderDetail> {
       onPressed: () {
         if (_formKey.currentState!.validate()) {
           widget.documentData
-            ..senderCompany = companyCtrl.text
-            ..senderName = senderCtrl.text
-            ..senderPhone = phoneCtrl.text
+            ..senderCompany = companyCtrl.text.trim()
+            ..senderName = senderCtrl.text.trim()
+            ..senderPhone = phoneCtrl.text.trim()
             ..documentType = selectedDocumentType
-            ..description = descCtrl.text;
+            ..description = descCtrl.text.trim();
 
           Navigator.push(
             context,
@@ -248,6 +267,7 @@ class _SenderDetailState extends State<SenderDetail> {
         minimumSize: const Size(double.infinity, 54),
         backgroundColor: const Color(0xFF2563EB),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 2,
       ),
       child: const Text(
         "Next",
