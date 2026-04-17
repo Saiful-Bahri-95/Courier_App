@@ -67,10 +67,11 @@ Aplikasi mobile berbasis Flutter yang dirancang untuk menyederhanakan proses pen
 ```dart
 // Mengambil detail berdasarkan ID dokumen
 final detail = await DocumentService.getDocumentDetail(documentId);
-
+```
 ## 🤝 Kontribusi
-Kontribusi selalu terbuka! Jika Anda menemukan bug atau ingin menambahkan fitur baru:
 
+### Kontribusi selalu terbuka! Jika Anda menemukan bug atau ingin menambahkan fitur baru:
+```
 1. Fork repositori ini.
 
 2. Buat branch fitur baru (git checkout -b fitur/FiturHebat).
@@ -80,8 +81,10 @@ Kontribusi selalu terbuka! Jika Anda menemukan bug atau ingin menambahkan fitur 
 4. Push ke branch tersebut (git push origin fitur/FiturHebat).
 
 5. Buat Pull Request.
+```
 
-📄 Lisensi
+## 📄 Lisensi
+
 Proyek ini berada di bawah Lisensi MIT. Lihat file LICENSE untuk informasi lebih lanjut.
 
 Dibuat dengan ❤️ oleh Saiful Bahri
