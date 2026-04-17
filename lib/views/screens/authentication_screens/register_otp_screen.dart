@@ -56,6 +56,12 @@ class _RegisterOtpScreenState extends State<RegisterOtpScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Image.asset(
+                    'assets/images/banner2.png',
+                    width: 150,
+                    height: 150,
+                  ),
+                  SizedBox(height: 20),
                   Text(
                     'Verify Your Email 📧',
                     style: GoogleFonts.poppins(

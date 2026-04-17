@@ -16,7 +16,7 @@ class BottomSheetPreviewDocument extends StatelessWidget {
 
   String _formatDateTime(DateTime? date) {
     if (date == null) return "-";
-    return DateFormat('EEEE, dd MMM y').format(date);
+    return DateFormat('EEEE, dd MMM y - HH:mm').format(date);
   }
 
   @override
@@ -24,6 +24,7 @@ class BottomSheetPreviewDocument extends StatelessWidget {
     return FutureBuilder<DocumentDetailModel>(
       future: DocumentService.getDocumentDetail(documentId),
       builder: (context, snapshot) {
+        // Loading
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Padding(
             padding: EdgeInsets.all(40),
@@ -31,10 +32,34 @@ class BottomSheetPreviewDocument extends StatelessWidget {
           );
         }
 
+        // Error
         if (snapshot.hasError) {
+          final err = snapshot.error.toString();
+          final isNetworkError =
+              err.contains('SocketException') ||
+              err.contains('Failed host lookup');
           return Padding(
             padding: const EdgeInsets.all(24),
-            child: Center(child: Text(snapshot.error.toString())),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isNetworkError ? Icons.wifi_off : Icons.error_outline,
+                    size: 48,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    isNetworkError
+                        ? 'Tidak dapat terhubung ke server.'
+                        : 'Terjadi kesalahan. Coba lagi.',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ],
+              ),
+            ),
           );
         }
 
@@ -42,10 +67,10 @@ class BottomSheetPreviewDocument extends StatelessWidget {
 
         return Column(
           children: [
-            /// ================= HEADER =================
+            // ===== HEADER =====
             const SizedBox(height: 8),
 
-            /// 🔹 Swipe Indicator
+            // Swipe Indicator
             Container(
               width: 40,
               height: 4,
@@ -54,61 +79,53 @@ class BottomSheetPreviewDocument extends StatelessWidget {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-
             const SizedBox(height: 12),
 
-            /// 🔹 Title + Close Button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "Info Pengiriman",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                ],
+            // Title
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                "Info Pengiriman",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
-            SizedBox(height: 8),
-
+            const SizedBox(height: 8),
             const Divider(height: 5, color: Colors.black),
 
-            /// ================= CONTENT =================
+            // ===== CONTENT =====
             Expanded(
               child: SingleChildScrollView(
                 controller: scrollController,
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Header row: label + tanggal
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           "Detail Pengirim",
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Spacer(),
-
+                        const Spacer(),
                         Text(
                           _formatDateTime(data.receivedDate),
+                          textAlign: TextAlign.right,
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 12, // ✅ lebih kecil agar tidak overflow
                             fontWeight: FontWeight.bold,
                             color: Color.fromARGB(255, 120, 119, 119),
                           ),
                         ),
-                        SizedBox(width: 5),
                       ],
                     ),
+                    const SizedBox(height: 16),
 
-                    SizedBox(height: 16),
-
-                    /// ===== DETAIL PENGIRIM =====
+                    // Card Pengirim
                     _gradientInfoCard(
                       title: data.senderCompany ?? "-",
                       subtitle: "From ${data.senderName}",
@@ -120,16 +137,16 @@ class BottomSheetPreviewDocument extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 16),
-                    Text(
+                    const Text(
                       "Detail Penerima",
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                    /// ===== DETAIL PENERIMA =====
+                    // Card Penerima
                     _gradientInfoCard(
                       title: data.receiverCompany ?? "-",
                       subtitle: "To ${data.receiverName}",
@@ -141,67 +158,59 @@ class BottomSheetPreviewDocument extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 16),
-
-                    /// ===== KETERANGAN =====
-                    Text(
+                    const Text(
                       "Keterangan",
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 16),
 
+                    // Card Keterangan
                     _descriptionCard(
                       description: data.description ?? "-",
                       documentType: data.documentType,
                       signedName: data.signedName,
-                      onTapBuktiFoto: () {
-                        _showBuktiFoto(context, data);
-                      },
+                      onTapBuktiFoto: () => _showBuktiFoto(context, data),
                     ),
 
                     const SizedBox(height: 24),
 
-                    /// ===== BUKTI FOTO =====
+                    // Tombol Delete & Share
                     Row(
                       children: [
-                        /// DELETE
+                        // Delete
                         SizedBox(
                           width: 110,
                           child: OutlinedButton(
                             style: OutlinedButton.styleFrom(
-                              backgroundColor: const Color(0xFFEAF3E5),
+                              backgroundColor: const Color(0xFFFFEBEB),
                               side: BorderSide.none,
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
                               ),
                             ),
-
                             onPressed: () async {
                               final confirm = await _showDeleteConfirmation(
                                 context,
                               );
-
                               if (confirm == true) {
                                 await DocumentService.deleteDocument(
                                   documentId,
                                 );
-
-                                // 🔥 INI YANG WAJIB
                                 Navigator.pop(
                                   // ignore: use_build_context_synchronously
                                   context,
                                   true,
-                                ); // TUTUP BOTTOMSHEET + KIRIM RESULT
+                                );
                               }
                             },
-
                             child: const Text(
                               "Delete",
                               style: TextStyle(
-                                color: Color.fromARGB(255, 255, 0, 0),
+                                color: Colors.red,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -210,7 +219,7 @@ class BottomSheetPreviewDocument extends StatelessWidget {
 
                         const SizedBox(width: 16),
 
-                        /// SHARE
+                        // Share
                         Expanded(
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
@@ -243,6 +252,8 @@ class BottomSheetPreviewDocument extends StatelessWidget {
   }
 }
 
+// ===== WIDGET HELPERS =====
+
 Widget _gradientInfoCard({
   required String title,
   required String subtitle,
@@ -258,15 +269,15 @@ Widget _gradientInfoCard({
       boxShadow: [
         BoxShadow(
           // ignore: deprecated_member_use
-          color: Colors.black.withOpacity(0.9),
-          blurRadius: 5,
+          color: Colors.black.withOpacity(0.25), // ✅ dikurangi dari 0.9
+          blurRadius: 8,
           offset: const Offset(4, 4),
         ),
       ],
     ),
     child: Row(
       children: [
-        /// TEXT
+        // Text
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -278,17 +289,30 @@ Widget _gradientInfoCard({
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
+                overflow:
+                    TextOverflow.ellipsis, // ✅ teks panjang tidak overflow
               ),
               const SizedBox(height: 6),
-              Text(subtitle, style: const TextStyle(color: Colors.white)),
+              Text(
+                subtitle,
+                style: const TextStyle(color: Colors.white),
+                overflow: TextOverflow.ellipsis,
+              ),
               const SizedBox(height: 6),
               Row(
                 children: [
-                  Icon(Icons.phone_in_talk, size: 16, color: Colors.white),
-                  SizedBox(width: 5),
-                  Text(
-                    phone ?? "-",
-                    style: const TextStyle(color: Colors.white),
+                  const Icon(
+                    Icons.phone_in_talk,
+                    size: 16,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(width: 5),
+                  Flexible(
+                    child: Text(
+                      phone ?? "-",
+                      style: const TextStyle(color: Colors.white),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),
@@ -296,7 +320,7 @@ Widget _gradientInfoCard({
           ),
         ),
 
-        /// ILLUSTRATION PLACEHOLDER
+        // Illustration
         Container(
           width: 80,
           height: 80,
@@ -320,16 +344,9 @@ Widget _descriptionCard({
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      /// MAIN CARD (SEJAJAR DENGAN PENGIRIM & PENERIMA)
       Container(
         width: double.infinity,
-        // ✅ ikut parent
-        padding: const EdgeInsets.only(
-          left: 30,
-          right: 30,
-          top: 20,
-          bottom: 10,
-        ),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             colors: [Color(0xFF00B4B0), Color(0xFF007E7C)],
@@ -338,8 +355,8 @@ Widget _descriptionCard({
           boxShadow: [
             BoxShadow(
               // ignore: deprecated_member_use
-              color: Colors.black.withOpacity(0.9),
-              blurRadius: 5,
+              color: Colors.black.withOpacity(0.25), // ✅ dikurangi dari 0.9
+              blurRadius: 8,
               offset: const Offset(4, 4),
             ),
           ],
@@ -347,41 +364,53 @@ Widget _descriptionCard({
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// DESC BOX (PUTIH)
+            // Description box
             Container(
-              width: double.infinity, // ✅ penuh
-              constraints: const BoxConstraints(minHeight: 120),
+              width: double.infinity,
+              constraints: const BoxConstraints(minHeight: 80),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                'Description : \n$description',
+                'Description :\n$description',
                 style: const TextStyle(fontSize: 14),
               ),
             ),
-
             const SizedBox(height: 12),
-
             Row(
               children: [
-                Icon(Icons.description_rounded, size: 18, color: Colors.white),
+                const Icon(
+                  Icons.description_rounded,
+                  size: 18,
+                  color: Colors.white,
+                ),
                 const SizedBox(width: 4),
-                Text(
-                  documentType ?? "-",
-                  style: const TextStyle(color: Colors.white),
+                Flexible(
+                  child: Text(
+                    documentType ?? "-",
+                    style: const TextStyle(color: Colors.white),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 4),
             Row(
               children: [
-                Icon(Icons.person_pin_outlined, size: 16, color: Colors.white),
+                const Icon(
+                  Icons.person_pin_outlined,
+                  size: 16,
+                  color: Colors.white,
+                ),
                 const SizedBox(width: 5),
-                Text(
-                  signedName ?? "-",
-                  style: const TextStyle(color: Colors.white),
+                Flexible(
+                  child: Text(
+                    signedName ?? "-",
+                    style: const TextStyle(color: Colors.white),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
@@ -391,19 +420,22 @@ Widget _descriptionCard({
 
       const SizedBox(height: 8),
 
-      /// BUKTI FOTO LABEL
+      // Bukti Foto label
       InkWell(
         onTap: onTapBuktiFoto,
-
-        child: Row(
-          children: const [
-            Icon(Icons.remove_red_eye, size: 20),
-            SizedBox(width: 6),
-            Text(
-              "Bukti Foto",
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-            ),
-          ],
+        borderRadius: BorderRadius.circular(8),
+        child: const Padding(
+          padding: EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+          child: Row(
+            children: [
+              Icon(Icons.remove_red_eye, size: 20),
+              SizedBox(width: 6),
+              Text(
+                "Bukti Foto",
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
         ),
       ),
     ],
@@ -419,13 +451,13 @@ void _showBuktiFoto(BuildContext context, DocumentData data) {
         insetPadding: const EdgeInsets.all(16),
         child: Stack(
           children: [
-            /// IMAGE PREVIEW
+            // Image preview
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: Container(color: Colors.black, child: _previewImage(data)),
             ),
 
-            /// CLOSE BUTTON
+            // Close button
             Positioned(
               top: 8,
               right: 8,
@@ -450,7 +482,6 @@ void _showBuktiFoto(BuildContext context, DocumentData data) {
 }
 
 Widget _previewImage(DocumentData data) {
-  // 🔥 VIEW MODE (URL)
   if (data.receiverImageUrl != null &&
       data.receiverImageUrl!.trim().isNotEmpty) {
     return Image.network(
@@ -465,7 +496,6 @@ Widget _previewImage(DocumentData data) {
     );
   }
 
-  // CREATE MODE (FILE)
   if (data.receiverImage != null) {
     return Image.file(data.receiverImage!, fit: BoxFit.contain);
   }
@@ -481,7 +511,6 @@ Future<bool?> _showDeleteConfirmation(BuildContext context) {
     barrierDismissible: false,
     builder: (context) {
       bool isDeleting = false;
-
       return StatefulBuilder(
         builder: (context, setState) {
           return Dialog(
@@ -493,9 +522,22 @@ Future<bool?> _showDeleteConfirmation(BuildContext context) {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // ✅ Tambah icon peringatan
+                  const Icon(
+                    Icons.warning_amber_rounded,
+                    size: 48,
+                    color: Colors.red,
+                  ),
+                  const SizedBox(height: 12),
                   const Text(
                     "Hapus Dokumen?",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    "Tindakan ini tidak dapat dibatalkan.",
+                    style: TextStyle(color: Colors.grey, fontSize: 13),
+                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 24),
                   Row(
@@ -505,6 +547,12 @@ Future<bool?> _showDeleteConfirmation(BuildContext context) {
                           onPressed: isDeleting
                               ? null
                               : () => Navigator.pop(context, false),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
                           child: const Text(
                             "Batal",
                             style: TextStyle(color: Colors.black),
@@ -516,15 +564,16 @@ Future<bool?> _showDeleteConfirmation(BuildContext context) {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                           onPressed: isDeleting
                               ? null
                               : () async {
                                   setState(() => isDeleting = true);
-                                  Navigator.pop(
-                                    context,
-                                    true,
-                                  ); // ✅ hanya return true
+                                  Navigator.pop(context, true);
                                 },
                           child: isDeleting
                               ? const SizedBox(
