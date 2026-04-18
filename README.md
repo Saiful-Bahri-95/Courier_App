@@ -1,6 +1,6 @@
 # 📦 Courier App
 
-Aplikasi manajemen pengiriman dokumen berbasis Flutter, terhubung ke backend Node.js dengan MongoDB Atlas. Dirancang untuk PT KGI Sekuritas Indonesia dalam mengelola tanda terima pengiriman dokumen secara digital.
+Aplikasi manajemen pengiriman dokumen berbasis Flutter, terhubung ke backend Node.js dengan MongoDB Atlas. Dirancang untuk mengelola tanda terima pengiriman dokumen secara digital.
 
 ---
 
