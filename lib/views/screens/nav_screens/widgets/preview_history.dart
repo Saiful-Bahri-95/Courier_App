@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:store_app/models/document_data.dart';
 import 'package:store_app/models/document_detail_model.dart';
+import 'package:store_app/provider/user_provider.dart';
 import 'package:store_app/services/document_service.dart';
+import 'package:store_app/services/pdf_service.dart';
 
-class BottomSheetPreviewDocument extends StatelessWidget {
+class BottomSheetPreviewDocument extends ConsumerWidget {
   final String documentId;
   final ScrollController scrollController;
 
@@ -16,11 +19,12 @@ class BottomSheetPreviewDocument extends StatelessWidget {
 
   String _formatDateTime(DateTime? date) {
     if (date == null) return "-";
-    return DateFormat('EEEE, dd MMM y - HH:mm').format(date);
+    return DateFormat('EEEE, dd MMMM y - HH:mm').format(date);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(userProvider); // ← ambil user
     return FutureBuilder<DocumentDetailModel>(
       future: DocumentService.getDocumentDetail(documentId),
       builder: (context, snapshot) {
@@ -69,8 +73,6 @@ class BottomSheetPreviewDocument extends StatelessWidget {
           children: [
             // ===== HEADER =====
             const SizedBox(height: 8),
-
-            // Swipe Indicator
             Container(
               width: 40,
               height: 4,
@@ -80,8 +82,6 @@ class BottomSheetPreviewDocument extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-
-            // Title
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Text(
@@ -100,7 +100,6 @@ class BottomSheetPreviewDocument extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header row: label + tanggal
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -116,7 +115,7 @@ class BottomSheetPreviewDocument extends StatelessWidget {
                           _formatDateTime(data.receivedDate),
                           textAlign: TextAlign.right,
                           style: const TextStyle(
-                            fontSize: 12, // ✅ lebih kecil agar tidak overflow
+                            fontSize: 12,
                             fontWeight: FontWeight.bold,
                             color: Color.fromARGB(255, 120, 119, 119),
                           ),
@@ -124,8 +123,6 @@ class BottomSheetPreviewDocument extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 16),
-
-                    // Card Pengirim
                     _gradientInfoCard(
                       title: data.senderCompany ?? "-",
                       subtitle: "From ${data.senderName}",
@@ -135,7 +132,6 @@ class BottomSheetPreviewDocument extends StatelessWidget {
                         colors: [Color(0xFF5F77F5), Color(0xFF37458F)],
                       ),
                     ),
-
                     const SizedBox(height: 16),
                     const Text(
                       "Detail Penerima",
@@ -145,8 +141,6 @@ class BottomSheetPreviewDocument extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-
-                    // Card Penerima
                     _gradientInfoCard(
                       title: data.receiverCompany ?? "-",
                       subtitle: "To ${data.receiverName}",
@@ -156,7 +150,6 @@ class BottomSheetPreviewDocument extends StatelessWidget {
                         colors: [Color(0xFF3BB54A), Color(0xFF1F7A33)],
                       ),
                     ),
-
                     const SizedBox(height: 16),
                     const Text(
                       "Keterangan",
@@ -166,15 +159,12 @@ class BottomSheetPreviewDocument extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-
-                    // Card Keterangan
                     _descriptionCard(
                       description: data.description ?? "-",
                       documentType: data.documentType,
                       signedName: data.signedName,
                       onTapBuktiFoto: () => _showBuktiFoto(context, data),
                     ),
-
                     const SizedBox(height: 24),
 
                     // Tombol Delete & Share
@@ -200,11 +190,8 @@ class BottomSheetPreviewDocument extends StatelessWidget {
                                 await DocumentService.deleteDocument(
                                   documentId,
                                 );
-                                Navigator.pop(
-                                  // ignore: use_build_context_synchronously
-                                  context,
-                                  true,
-                                );
+                                // ignore: use_build_context_synchronously
+                                Navigator.pop(context, true);
                               }
                             },
                             child: const Text(
@@ -216,10 +203,9 @@ class BottomSheetPreviewDocument extends StatelessWidget {
                             ),
                           ),
                         ),
-
                         const SizedBox(width: 16),
 
-                        // Share
+                        // ✅ SHARE - AKTIF
                         Expanded(
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
@@ -229,7 +215,22 @@ class BottomSheetPreviewDocument extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(14),
                               ),
                             ),
-                            onPressed: () {},
+                            onPressed: () async {
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (_) => const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                              await PdfService.generateAndShare(
+                                context,
+                                data,
+                                user?.fullname ?? '-',
+                              );
+                              // ignore: use_build_context_synchronously
+                              Navigator.pop(context);
+                            },
                             child: const Text(
                               "Share",
                               style: TextStyle(
@@ -252,7 +253,7 @@ class BottomSheetPreviewDocument extends StatelessWidget {
   }
 }
 
-// ===== WIDGET HELPERS =====
+// ===== FLUTTER WIDGET HELPERS =====
 
 Widget _gradientInfoCard({
   required String title,
@@ -269,7 +270,7 @@ Widget _gradientInfoCard({
       boxShadow: [
         BoxShadow(
           // ignore: deprecated_member_use
-          color: Colors.black.withOpacity(0.25), // ✅ dikurangi dari 0.9
+          color: Colors.black.withOpacity(0.25),
           blurRadius: 8,
           offset: const Offset(4, 4),
         ),
@@ -277,7 +278,6 @@ Widget _gradientInfoCard({
     ),
     child: Row(
       children: [
-        // Text
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -289,8 +289,7 @@ Widget _gradientInfoCard({
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
-                overflow:
-                    TextOverflow.ellipsis, // ✅ teks panjang tidak overflow
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 6),
               Text(
@@ -319,8 +318,6 @@ Widget _gradientInfoCard({
             ],
           ),
         ),
-
-        // Illustration
         Container(
           width: 80,
           height: 80,
@@ -355,7 +352,7 @@ Widget _descriptionCard({
           boxShadow: [
             BoxShadow(
               // ignore: deprecated_member_use
-              color: Colors.black.withOpacity(0.25), // ✅ dikurangi dari 0.9
+              color: Colors.black.withOpacity(0.25),
               blurRadius: 8,
               offset: const Offset(4, 4),
             ),
@@ -364,7 +361,6 @@ Widget _descriptionCard({
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Description box
             Container(
               width: double.infinity,
               constraints: const BoxConstraints(minHeight: 80),
@@ -417,10 +413,7 @@ Widget _descriptionCard({
           ],
         ),
       ),
-
       const SizedBox(height: 8),
-
-      // Bukti Foto label
       InkWell(
         onTap: onTapBuktiFoto,
         borderRadius: BorderRadius.circular(8),
@@ -451,13 +444,10 @@ void _showBuktiFoto(BuildContext context, DocumentData data) {
         insetPadding: const EdgeInsets.all(16),
         child: Stack(
           children: [
-            // Image preview
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: Container(color: Colors.black, child: _previewImage(data)),
             ),
-
-            // Close button
             Positioned(
               top: 8,
               right: 8,
@@ -495,11 +485,9 @@ Widget _previewImage(DocumentData data) {
           const Center(child: Icon(Icons.broken_image, color: Colors.white)),
     );
   }
-
   if (data.receiverImage != null) {
     return Image.file(data.receiverImage!, fit: BoxFit.contain);
   }
-
   return const Center(
     child: Text("Tidak ada foto", style: TextStyle(color: Colors.white)),
   );
@@ -522,7 +510,6 @@ Future<bool?> _showDeleteConfirmation(BuildContext context) {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // ✅ Tambah icon peringatan
                   const Icon(
                     Icons.warning_amber_rounded,
                     size: 48,

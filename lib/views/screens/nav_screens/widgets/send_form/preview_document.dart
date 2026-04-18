@@ -28,7 +28,7 @@ class PreviewDocumentScreen extends ConsumerStatefulWidget {
 class _PreviewDocumentScreenState extends ConsumerState<PreviewDocumentScreen> {
   String _formatDateTime(DateTime? date) {
     if (date == null) return "-";
-    return DateFormat('EEEE, d/MM/y, HH:mm:ss').format(date);
+    return DateFormat('EEEE, dd MMMM yyyy, HH:mm').format(date);
   }
 
   @override

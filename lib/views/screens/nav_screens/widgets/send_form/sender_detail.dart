@@ -30,6 +30,14 @@ class _SenderDetailState extends State<SenderDetail> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // ✅ Set nilai default
+    companyCtrl.text = 'PT KGI Sekuritas Indonesia';
+    phoneCtrl.text = '021-2505337';
+  }
+
+  @override
   Widget build(BuildContext context) {
     final topPadding = MediaQuery.of(context).padding.top;
 
@@ -96,17 +104,20 @@ class _SenderDetailState extends State<SenderDetail> {
                         label: "Nama Perusahaan",
                         icon: Icons.business,
                         controller: companyCtrl,
-                      ),
-                      _buildInputField(
-                        label: "Nama Pengirim",
-                        icon: Icons.person,
-                        controller: senderCtrl,
+                        readOnly: true, // ✅ buat field ini readonly
                       ),
                       _buildInputField(
                         label: "Nomor Telepon",
                         icon: Icons.phone,
                         keyboardType: TextInputType.phone,
                         controller: phoneCtrl,
+                        readOnly: true, // ✅ buat field ini readonly
+                      ),
+                      _buildInputField(
+                        label: "Nama Pengirim",
+                        icon: Icons.person,
+                        controller: senderCtrl,
+                        readOnly: false,
                       ),
                       const SizedBox(height: 8),
                       const Text(
@@ -138,17 +149,21 @@ class _SenderDetailState extends State<SenderDetail> {
     required IconData icon,
     required TextEditingController controller,
     TextInputType keyboardType = TextInputType.text,
+    bool readOnly = false, // ← tambah ini
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
         controller: controller,
         keyboardType: keyboardType,
+        readOnly: readOnly, // ← tambah ini
         decoration: InputDecoration(
           labelText: label,
           prefixIcon: Icon(icon),
           filled: true,
-          fillColor: const Color(0xFFF8FAFC),
+          fillColor: readOnly
+              ? const Color(0xFFEEEEEE) // ← warna abu kalau readonly
+              : const Color(0xFFF8FAFC),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: const BorderSide(color: Colors.grey),
@@ -202,7 +217,7 @@ class _SenderDetailState extends State<SenderDetail> {
             borderSide: const BorderSide(color: Colors.red, width: 2),
           ),
         ),
-        value: selectedDocumentType,
+        initialValue: selectedDocumentType,
         items: const [
           DropdownMenuItem(value: "Document", child: Text("Document")),
           DropdownMenuItem(value: "Invoice", child: Text("Invoice")),
