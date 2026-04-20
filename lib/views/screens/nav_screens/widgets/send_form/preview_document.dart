@@ -8,7 +8,8 @@ import 'package:store_app/services/cloudinary_service.dart';
 import 'package:store_app/services/document_service.dart';
 import 'package:store_app/services/manage_http_response.dart';
 import 'package:store_app/views/screens/main_screen.dart';
-import 'package:store_app/views/screens/nav_screens/widgets/send_form/sender_detail.dart';
+import 'package:store_app/views/screens/utils.dart';
+import 'send_form_widgets.dart';
 
 class PreviewDocumentScreen extends ConsumerStatefulWidget {
   final DocumentData? documentData;
@@ -61,7 +62,13 @@ class _PreviewDocumentScreenState extends ConsumerState<PreviewDocumentScreen> {
       backgroundColor: kNavyBlue,
       body: Column(
         children: [
-          _buildHeader(context, isViewMode),
+          buildSendHeader(
+            context,
+            title: 'Preview Dokumen',
+            subtitle: isViewMode
+                ? 'Detail pengiriman'
+                : 'Periksa sebelum submit',
+          ),
           Expanded(
             child: Container(
               decoration: const BoxDecoration(
@@ -149,64 +156,11 @@ class _PreviewDocumentScreenState extends ConsumerState<PreviewDocumentScreen> {
                       ],
                     ),
                     const SizedBox(height: 24),
-                    _buildSubmitButton(context, data, isViewMode),
+                    _buildSubmitButton(data, isViewMode),
                   ],
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context, bool isViewMode) {
-    final topPadding = MediaQuery.of(context).padding.top;
-    return Container(
-      color: kNavyBlue,
-      padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
-        top: topPadding + 16,
-        bottom: 20,
-      ),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(
-                Icons.arrow_back_ios_new,
-                color: Colors.white,
-                size: 18,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Preview Dokumen',
-                style: TextStyle(
-                  fontSize: 22,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                isViewMode ? 'Detail pengiriman' : 'Periksa sebelum submit',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.white.withOpacity(0.7),
-                ),
-              ),
-            ],
           ),
         ],
       ),
@@ -221,6 +175,7 @@ class _PreviewDocumentScreenState extends ConsumerState<PreviewDocumentScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
+            // ignore: deprecated_member_use
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
@@ -254,11 +209,13 @@ class _PreviewDocumentScreenState extends ConsumerState<PreviewDocumentScreen> {
                     fontSize: 15,
                     color: kTextDark,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
                 Text(
                   '→ ${data.receiverCompany ?? '-'}',
                   style: const TextStyle(color: kTextMuted, fontSize: 13),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -307,7 +264,6 @@ class _PreviewDocumentScreenState extends ConsumerState<PreviewDocumentScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(gradient: gradient),
@@ -326,7 +282,6 @@ class _PreviewDocumentScreenState extends ConsumerState<PreviewDocumentScreen> {
                 ],
               ),
             ),
-            // Content
             Container(
               color: Colors.white,
               padding: const EdgeInsets.all(16),
@@ -424,7 +379,6 @@ class _PreviewDocumentScreenState extends ConsumerState<PreviewDocumentScreen> {
 
   Widget _signatureWidget(DocumentData data) {
     Widget content;
-
     if (data.signature != null) {
       content = Image.memory(data.signature!, fit: BoxFit.contain);
     } else if (data.signatureUrl != null && data.signatureUrl!.isNotEmpty) {
@@ -446,73 +400,12 @@ class _PreviewDocumentScreenState extends ConsumerState<PreviewDocumentScreen> {
     );
   }
 
-  Widget _buildSubmitButton(
-    BuildContext context,
-    DocumentData data,
-    bool isViewMode,
-  ) {
+  Widget _buildSubmitButton(DocumentData data, bool isViewMode) {
     return SizedBox(
       width: double.infinity,
       height: 52,
       child: ElevatedButton(
-        onPressed: isViewMode
-            ? null
-            : () async {
-                final user = ref.read(userProvider);
-                if (user == null) {
-                  showSnackbar(context, 'User belum login');
-                  return;
-                }
-
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (_) => const Center(
-                    child: CircularProgressIndicator(color: Colors.white),
-                  ),
-                );
-
-                try {
-                  String? receiverImageUrl;
-                  if (widget.documentData?.receiverImage != null) {
-                    receiverImageUrl = await UploadService.uploadImageFile(
-                      widget.documentData!.receiverImage!,
-                      user.token,
-                    );
-                  }
-
-                  String? signatureUrl;
-                  if (widget.documentData?.signature != null) {
-                    signatureUrl = await UploadService.uploadSignature(
-                      widget.documentData!.signature!,
-                      user.token,
-                    );
-                  }
-
-                  await DocumentService.submit(
-                    widget.documentData!,
-                    receiverImageUrl,
-                    signatureUrl,
-                  );
-
-                  // ignore: use_build_context_synchronously
-                  Navigator.pop(context);
-                  // ignore: use_build_context_synchronously
-                  showSnackbar(context, 'Dokumen berhasil dikirim ✅');
-                  // ignore: use_build_context_synchronously
-                  Navigator.pushAndRemoveUntil(
-                    // ignore: use_build_context_synchronously
-                    context,
-                    MaterialPageRoute(builder: (_) => const MainScreen()),
-                    (route) => false,
-                  );
-                } catch (e) {
-                  // ignore: use_build_context_synchronously
-                  Navigator.pop(context);
-                  // ignore: use_build_context_synchronously
-                  showSnackbar(context, e.toString());
-                }
-              },
+        onPressed: isViewMode ? null : () => _onSubmit(data),
         style: ElevatedButton.styleFrom(
           backgroundColor: isViewMode ? kBorderColor : kAccentBlue,
           shape: RoundedRectangleBorder(
@@ -541,5 +434,60 @@ class _PreviewDocumentScreenState extends ConsumerState<PreviewDocumentScreen> {
         ),
       ),
     );
+  }
+
+  // ✅ Pakai this.context dari State langsung — tidak pass context sebagai parameter
+  // ✅ Guard dengan mounted (State.mounted) sebelum setiap penggunaan context
+  Future<void> _onSubmit(DocumentData data) async {
+    final user = ref.read(userProvider);
+    if (user == null) {
+      showSnackbar(context, 'User belum login');
+      return;
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) =>
+          const Center(child: CircularProgressIndicator(color: Colors.white)),
+    );
+
+    try {
+      String? receiverImageUrl;
+      if (widget.documentData?.receiverImage != null) {
+        receiverImageUrl = await UploadService.uploadImageFile(
+          widget.documentData!.receiverImage!,
+          user.token,
+        );
+      }
+
+      String? signatureUrl;
+      if (widget.documentData?.signature != null) {
+        signatureUrl = await UploadService.uploadSignature(
+          widget.documentData!.signature!,
+          user.token,
+        );
+      }
+
+      await DocumentService.submit(
+        widget.documentData!,
+        receiverImageUrl,
+        signatureUrl,
+      );
+
+      // ✅ mounted check pada State — aman digunakan sebelum akses this.context
+      if (!mounted) return;
+      Navigator.pop(context);
+      showSnackbar(context, 'Dokumen berhasil dikirim ✅');
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const MainScreen()),
+        (route) => false,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context);
+      showSnackbar(context, e.toString());
+    }
   }
 }

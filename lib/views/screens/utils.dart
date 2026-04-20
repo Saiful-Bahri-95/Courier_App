@@ -25,3 +25,16 @@ class AppGradients {
     end: Alignment.bottomRight,
   );
 }
+
+// ================================================
+// APP COLOR CONSTANTS
+// Dipindahkan dari sender_detail.dart agar bisa
+// dipakai di semua file tanpa circular import
+// ================================================
+
+const kNavyBlue = Color(0xFF1A3C8F);
+const kAccentBlue = Color(0xFF2563EB);
+const kLightBg = Color(0xFFF1F5F9);
+const kTextDark = Color(0xFF1E293B);
+const kTextMuted = Color(0xFF64748B);
+const kBorderColor = Color(0xFFCBD5E1);

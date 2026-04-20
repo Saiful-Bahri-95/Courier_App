@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:signature/signature.dart';
 import 'package:store_app/models/document_data.dart';
-import 'package:store_app/views/screens/nav_screens/widgets/send_form/sender_detail.dart';
+import 'package:store_app/views/screens/utils.dart';
 import 'preview_document.dart';
+import 'send_form_widgets.dart';
 
 class SignDetail extends StatefulWidget {
   final DocumentData documentData;
@@ -43,45 +44,48 @@ class _SignDetailState extends State<SignDetail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: kNavyBlue,
       body: Column(
         children: [
-          _buildHeader(context),
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-              ),
-              child: Form(
-                key: _formKey,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _stepIndicator(current: 3, total: 3),
-                      const SizedBox(height: 20),
-                      _sectionLabel('Tanggal Penerimaan'),
-                      const SizedBox(height: 12),
-                      _buildDatePicker(),
-                      const SizedBox(height: 20),
-                      _sectionLabel('Data Penerima'),
-                      const SizedBox(height: 12),
-                      _buildField(
-                        label: 'Nama Penerima',
-                        icon: Icons.person_rounded,
-                        controller: signedNameCtrl,
-                      ),
-                      const SizedBox(height: 8),
-                      _sectionLabel('Tanda Tangan'),
-                      const SizedBox(height: 12),
-                      _buildSignaturePad(),
-                      const SizedBox(height: 28),
-                      _buildBottomButtons(),
-                    ],
-                  ),
+          buildSendHeader(
+            context,
+            title: 'Send Document',
+            subtitle: 'Tanda Tangan & Konfirmasi',
+          ),
+          buildWhiteFormContainer(
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    buildStepIndicator(current: 3, total: 3),
+                    const SizedBox(height: 20),
+                    buildSectionLabel('Tanggal Penerimaan'),
+                    const SizedBox(height: 12),
+                    _buildDatePicker(),
+                    const SizedBox(height: 20),
+                    buildSectionLabel('Data Penerima'),
+                    const SizedBox(height: 12),
+                    buildFormField(
+                      label: 'Nama Penerima',
+                      icon: Icons.person_rounded,
+                      controller: signedNameCtrl,
+                    ),
+                    const SizedBox(height: 8),
+                    buildSectionLabel('Tanda Tangan'),
+                    const SizedBox(height: 12),
+                    _buildSignaturePad(),
+                    const SizedBox(height: 28),
+                    buildBottomNavButtons(
+                      context: context,
+                      nextLabel: 'Preview',
+                      nextIcon: Icons.preview_rounded,
+                      onNext: _onSubmit,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -91,107 +95,52 @@ class _SignDetailState extends State<SignDetail> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    final topPadding = MediaQuery.of(context).padding.top;
-    return Container(
-      color: kNavyBlue,
-      padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
-        top: topPadding + 16,
-        bottom: 20,
-      ),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(
-                Icons.arrow_back_ios_new,
-                color: Colors.white,
-                size: 18,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+  Future<void> _onSubmit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    if (_signatureController.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Row(
             children: [
-              const Text(
-                'Send Document',
-                style: TextStyle(
-                  fontSize: 22,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                'Tanda Tangan & Konfirmasi',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.white.withOpacity(0.7),
-                ),
-              ),
+              Icon(Icons.warning_rounded, color: Colors.white),
+              SizedBox(width: 8),
+              Text('Tanda tangan wajib diisi'),
             ],
           ),
-        ],
+          backgroundColor: Colors.orange,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+      return;
+    }
+
+    await Future.delayed(const Duration(milliseconds: 100));
+    final signatureBytes = await _signatureController.toPngBytes();
+
+    if (signatureBytes == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Gagal memproses tanda tangan')),
+      );
+      return;
+    }
+
+    widget.documentData
+      ..receivedDate = _selectedDate
+      ..signedName = signedNameCtrl.text.trim()
+      ..signature = signatureBytes;
+
+    if (!mounted) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) =>
+            PreviewDocumentScreen(documentData: widget.documentData),
       ),
-    );
-  }
-
-  Widget _stepIndicator({required int current, required int total}) {
-    return Row(
-      children: List.generate(total, (index) {
-        final isActive = index + 1 == current;
-        final isDone = index + 1 < current;
-        return Expanded(
-          child: Row(
-            children: [
-              Expanded(
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: isActive || isDone ? kAccentBlue : kBorderColor,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              ),
-              if (index < total - 1) const SizedBox(width: 6),
-            ],
-          ),
-        );
-      }),
-    );
-  }
-
-  Widget _sectionLabel(String label) {
-    return Row(
-      children: [
-        Container(
-          width: 4,
-          height: 18,
-          decoration: BoxDecoration(
-            color: kAccentBlue,
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: kTextDark,
-            letterSpacing: 0.2,
-          ),
-        ),
-      ],
     );
   }
 
@@ -247,19 +196,10 @@ class _SignDetailState extends State<SignDetail> {
                   color: isSelected
                       ? kAccentBlue
                       : isToday
-                      ? kAccentBlue.withOpacity(0.3)
+                      ? kAccentBlue
                       : kBorderColor,
-                  width: isSelected ? 0 : 1,
+                  width: isToday && !isSelected ? 1.5 : 1,
                 ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: kAccentBlue.withOpacity(0.3),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ]
-                    : [],
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -293,49 +233,6 @@ class _SignDetailState extends State<SignDetail> {
             ),
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildField({
-    required String label,
-    required IconData icon,
-    required TextEditingController controller,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: TextFormField(
-        controller: controller,
-        style: const TextStyle(fontSize: 14, color: kTextDark),
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: const TextStyle(color: kTextMuted, fontSize: 13),
-          prefixIcon: Icon(icon, size: 20, color: kAccentBlue),
-          filled: true,
-          fillColor: kLightBg,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: kBorderColor, width: 1),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: kAccentBlue, width: 1.5),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Colors.red, width: 1),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Colors.red, width: 1.5),
-          ),
-        ),
-        validator: (value) =>
-            value == null || value.trim().isEmpty ? '$label wajib diisi' : null,
       ),
     );
   }
@@ -381,129 +278,18 @@ class _SignDetailState extends State<SignDetail> {
           ),
         ),
         const SizedBox(height: 8),
-        Row(
-          children: [
-            TextButton.icon(
-              onPressed: () {
-                _signatureController.clear();
-                setState(() => _hasSignature = false);
-              },
-              icon: const Icon(
-                Icons.refresh_rounded,
-                size: 16,
-                color: kTextMuted,
-              ),
-              label: const Text(
-                'Ulangi Tanda Tangan',
-                style: TextStyle(color: kTextMuted, fontSize: 13),
-              ),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBottomButtons() {
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton(
-            onPressed: () => Navigator.pop(context),
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(0, 52),
-              side: const BorderSide(color: kBorderColor),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-            child: const Text(
-              'Kembali',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: kTextDark,
-              ),
-            ),
+        TextButton.icon(
+          onPressed: () {
+            _signatureController.clear();
+            setState(() => _hasSignature = false);
+          },
+          icon: const Icon(Icons.refresh_rounded, size: 16, color: kTextMuted),
+          label: const Text(
+            'Ulangi Tanda Tangan',
+            style: TextStyle(color: kTextMuted, fontSize: 13),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: ElevatedButton(
-            onPressed: () async {
-              if (!_formKey.currentState!.validate()) return;
-
-              if (_signatureController.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Row(
-                      children: [
-                        Icon(Icons.warning_rounded, color: Colors.white),
-                        SizedBox(width: 8),
-                        Text('Tanda tangan wajib diisi'),
-                      ],
-                    ),
-                    backgroundColor: Colors.orange,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                );
-                return;
-              }
-
-              await Future.delayed(const Duration(milliseconds: 100));
-              final signatureBytes = await _signatureController.toPngBytes();
-
-              if (signatureBytes == null) {
-                // ignore: use_build_context_synchronously
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Gagal memproses tanda tangan')),
-                );
-                return;
-              }
-
-              widget.documentData
-                ..receivedDate = _selectedDate
-                ..signedName = signedNameCtrl.text.trim()
-                ..signature = signatureBytes;
-
-              Navigator.push(
-                // ignore: use_build_context_synchronously
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      PreviewDocumentScreen(documentData: widget.documentData),
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size(0, 52),
-              backgroundColor: kAccentBlue,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              elevation: 0,
-            ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.preview_rounded, color: Colors.white, size: 18),
-                SizedBox(width: 6),
-                Text(
-                  'Preview',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           ),
         ),
       ],
