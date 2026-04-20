@@ -9,7 +9,6 @@ import 'package:store_app/services/document_service.dart';
 import 'package:store_app/services/manage_http_response.dart';
 import 'package:store_app/views/screens/main_screen.dart';
 import 'package:store_app/views/screens/nav_screens/widgets/send_form/sender_detail.dart';
-import 'package:store_app/views/screens/utils.dart';
 
 class PreviewDocumentScreen extends ConsumerStatefulWidget {
   final DocumentData? documentData;
