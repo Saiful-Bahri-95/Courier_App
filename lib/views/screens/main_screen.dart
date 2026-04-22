@@ -43,7 +43,7 @@ class _MainScreenState extends State<MainScreen> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
-        activeColor: Color(0xFF030F2F), // hijau FamilyMart Color(0xFF030F2F),
+        activeColor: Color(0xFF030F2F),
         color: const Color.fromARGB(255, 114, 75, 75),
 
         items: const [

@@ -14,42 +14,6 @@ import 'package:store_app/views/screens/main_screen.dart';
 import '../services/manage_http_response.dart';
 
 class AuthController {
-  //signup user function
-  // Future<void> signUpUser({
-  //   required BuildContext context,
-  //   required String email,
-  //   required String fullname,
-  //   required String password,
-  // }) async {
-  //   try {
-  //     http.Response response = await http.post(
-  //       Uri.parse('${ApiConfig.baseUrl}/api/signup'),
-  //       headers: const {'Content-Type': 'application/json; charset=UTF-8'},
-  //       body: jsonEncode({
-  //         'fullname': fullname,
-  //         'email': email,
-  //         'password': password,
-  //       }),
-  //     );
-
-  //     manageHttpResponse(
-  //       response: response,
-  //       // ignore: use_build_context_synchronously
-  //       context: context,
-  //       onSuccess: () {
-  //         showSnackbar(context, 'Account has been created');
-  //         Navigator.pushReplacement(
-  //           context,
-  //           MaterialPageRoute(builder: (_) => const LoginScreen()),
-  //         );
-  //       },
-  //     );
-  //   } catch (e) {
-  //     // ignore: use_build_context_synchronously
-  //     showSnackbar(context, 'Server error');
-  //   }
-  // }
-
   //signin user function
   Future<void> signInUser({
     required context,

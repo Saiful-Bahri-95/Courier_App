@@ -1,169 +1,153 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:store_app/provider/user_provider.dart';
+import 'package:store_app/views/screens/utils.dart';
 
 class HeaderWidget extends ConsumerWidget {
   const HeaderWidget({super.key});
 
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Selamat Pagi';
+    if (hour < 15) return 'Selamat Siang';
+    if (hour < 18) return 'Selamat Sore';
+    return 'Selamat Malam';
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final width = MediaQuery.of(context).size.width;
+    final topPadding = MediaQuery.of(context).padding.top;
     final user = ref.watch(userProvider);
 
-    return SizedBox(
-      width: width,
-      height: 180,
-      child: Stack(
+    return Container(
+      color: kNavyBlue,
+      padding: EdgeInsets.only(top: topPadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// Background Banner
-          Container(
-            width: width,
-            height: 130,
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(20),
-                bottomRight: Radius.circular(20),
-              ),
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Color(0xFF786DF5), Color(0xFFA79EFF)],
-              ),
-            ),
-          ),
-
-          /// Gradient Overlay
-          Container(
-            width: width,
-            height: 150,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                // ignore: deprecated_member_use
-                colors: [Colors.black.withOpacity(0.35), Colors.transparent],
-              ),
-            ),
-          ),
-
-          /// Search Bar
-          Positioned(
-            left: 16,
-            right: 16,
-            bottom: 30,
-            top: 100,
-            child: Material(
-              elevation: 6,
-              borderRadius: BorderRadius.circular(20),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Cari Apapun Disini',
-                  hintStyle: TextStyle(color: Colors.grey.shade600),
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.camera_alt_outlined),
-                    onPressed: () {},
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          /// Header User Info
-          Positioned(
-            top: 40,
-            left: 20,
-            right: 20,
+          // ── Top bar: avatar + greeting + actions ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
             child: Row(
               children: [
-                /// Avatar + Name
-                Row(
-                  children: [
-                    _UserAvatar(user: user),
-                    const SizedBox(width: 12),
-                    _UserGreeting(user: user),
-                  ],
+                // Avatar
+                Container(
+                  padding: const EdgeInsets.all(2.5),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    // ignore: deprecated_member_use
+                    color: Colors.white.withOpacity(0.25),
+                  ),
+                  child: CircleAvatar(
+                    radius: 22,
+                    backgroundColor: Colors.white,
+                    backgroundImage:
+                        (user != null &&
+                            user.avatar != null &&
+                            user.avatar!.isNotEmpty)
+                        ? NetworkImage(
+                                '${user.avatar}?v=${DateTime.now().millisecondsSinceEpoch}',
+                              )
+                              as ImageProvider
+                        : const AssetImage('assets/images/banner2.png'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+
+                // Greeting
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _getGreeting(),
+                        style: TextStyle(
+                          fontSize: 12,
+                          // ignore: deprecated_member_use
+                          color: Colors.white.withOpacity(0.65),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        user != null ? user.fullname : 'Pengguna',
+                        style: const TextStyle(
+                          fontSize: 17,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.2,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
 
-                const Spacer(),
-
-                _ActionIcon(icon: Icons.notifications_none, onTap: () {}),
-                const SizedBox(width: 12),
-                _ActionIcon(icon: Icons.chat_bubble_outline, onTap: () {}),
+                // Action icons
+                _ActionIcon(icon: Icons.notifications_rounded, onTap: () {}),
+                const SizedBox(width: 10),
+                _ActionIcon(icon: Icons.chat_bubble_rounded, onTap: () {}),
               ],
             ),
           ),
+
+          // ── Search bar ──
+          Container(
+            margin: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                  // ignore: deprecated_member_use
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.search_rounded, color: kTextMuted, size: 20),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: TextField(
+                    style: TextStyle(fontSize: 14, color: kTextDark),
+                    decoration: InputDecoration(
+                      hintText: 'Cari dokumen...',
+                      hintStyle: TextStyle(color: kBorderColor, fontSize: 14),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(vertical: 14),
+                    ),
+                  ),
+                ),
+                Container(
+                  width: 1,
+                  height: 22,
+                  color: kBorderColor,
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                ),
+                GestureDetector(
+                  onTap: () {},
+                  child: const Icon(
+                    Icons.document_scanner_rounded,
+                    color: kAccentBlue,
+                    size: 20,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ── Bottom curve spacer ──
+          const SizedBox(height: 20),
         ],
       ),
     );
   }
 }
 
-class _UserAvatar extends StatelessWidget {
-  // ignore: prefer_typing_uninitialized_variables
-  final user;
-
-  const _UserAvatar({required this.user});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(2), // border thickness
-      decoration: const BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.teal, // border color
-      ),
-      child: CircleAvatar(
-        radius: 22,
-        backgroundColor: Colors.white,
-        backgroundImage:
-            (user != null && user.avatar != null && user.avatar!.isNotEmpty)
-            ? NetworkImage(
-                '${user.avatar}?v=${DateTime.now().millisecondsSinceEpoch}',
-              )
-            : const AssetImage('assets/images/banner2.png') as ImageProvider,
-      ),
-    );
-  }
-}
-
-class _UserGreeting extends StatelessWidget {
-  // ignore: prefer_typing_uninitialized_variables
-  final user;
-
-  const _UserGreeting({required this.user});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          user != null ? 'Hi, ${user.fullname}' : 'Hi!',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 1),
-        const Text(
-          'Good to see you again!',
-          style: TextStyle(color: Colors.white70, fontSize: 12),
-        ),
-      ],
-    );
-  }
-}
-
-/// Reusable Icon Button
 class _ActionIcon extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
@@ -172,19 +156,17 @@ class _ActionIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      // ignore: deprecated_member_use
-      color: Colors.white.withOpacity(0.9),
-      borderRadius: BorderRadius.circular(20),
-      elevation: 4,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: onTap,
-        child: SizedBox(
-          width: 40,
-          height: 40,
-          child: Icon(icon, color: Colors.black87, size: 22),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          // ignore: deprecated_member_use
+          color: Colors.white.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(12),
         ),
+        child: Icon(icon, color: Colors.white, size: 20),
       ),
     );
   }

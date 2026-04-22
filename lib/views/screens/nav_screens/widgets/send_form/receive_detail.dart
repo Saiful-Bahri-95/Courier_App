@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:store_app/models/document_data.dart';
+import 'package:store_app/services/draft_service.dart';
+import 'package:store_app/views/screens/main_screen.dart';
 import 'package:store_app/views/screens/nav_screens/widgets/send_form/sign_detail.dart';
 import 'package:store_app/views/screens/utils.dart';
 import 'send_form_widgets.dart';
@@ -215,6 +217,75 @@ class _ReceiverDetailScreenState extends State<ReceiverDetailScreen> {
                           );
                         }
                       },
+                    ),
+                    // Tambah tombol simpan draft setelah _buildBottomButtons()
+                    const SizedBox(height: 10),
+                    TextButton.icon(
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          widget.documentData
+                            ..receiverCompany = companyCtrl.text.trim()
+                            ..receiverName = receiverCtrl.text.trim()
+                            ..receiverPhone = phoneCtrl.text.trim();
+
+                          final draft = DraftDocument(
+                            id: DateTime.now().millisecondsSinceEpoch
+                                .toString(),
+                            senderCompany:
+                                widget.documentData.senderCompany ?? '',
+                            senderName: widget.documentData.senderName ?? '',
+                            senderPhone: widget.documentData.senderPhone ?? '',
+                            receiverCompany:
+                                widget.documentData.receiverCompany ?? '',
+                            receiverName:
+                                widget.documentData.receiverName ?? '',
+                            receiverPhone:
+                                widget.documentData.receiverPhone ?? '',
+                            documentType: widget.documentData.documentType,
+                            description: widget.documentData.description,
+                            createdAt: DateTime.now(),
+                          );
+
+                          await DraftService.save(draft);
+
+                          // ignore: use_build_context_synchronously
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Row(
+                                children: [
+                                  Icon(
+                                    Icons.check_circle_rounded,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text('Draft berhasil disimpan'),
+                                ],
+                              ),
+                              backgroundColor: const Color(0xFF16A34A),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          );
+                          // ignore: use_build_context_synchronously
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                              builder: (_) => const MainScreen(),
+                            ),
+                            (route) => false,
+                          );
+                        }
+                      },
+                      icon: const Icon(
+                        Icons.save_outlined,
+                        size: 16,
+                        color: kTextMuted,
+                      ),
+                      label: const Text(
+                        'Simpan sebagai Draft',
+                        style: TextStyle(color: kTextMuted, fontSize: 13),
+                      ),
                     ),
                   ],
                 ),

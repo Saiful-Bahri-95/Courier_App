@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:store_app/models/document_list_model.dart';
 import 'package:store_app/services/document_service.dart';
 import 'package:store_app/views/screens/nav_screens/widgets/preview_history.dart';
+import 'package:store_app/views/screens/utils.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -33,51 +34,80 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final topPadding = MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFA79EFF),
+      backgroundColor: kNavyBlue,
       body: Column(
         children: [
-          // ✅ Header responsif
+          // ===== HEADER =====
           Padding(
             padding: EdgeInsets.only(
               left: 20,
+              right: 20,
               top: topPadding + 20,
               bottom: 24,
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Text(
-                  'History',
-                  style: TextStyle(
-                    fontSize: 25,
-                    color: Color(0xFF030F2F),
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.01,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'History',
+                        style: TextStyle(
+                          fontSize: 26,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                      Text(
+                        'Riwayat pengiriman dokumen',
+                        style: TextStyle(
+                          fontSize: 13,
+                          // ignore: deprecated_member_use
+                          color: Colors.white.withOpacity(0.65),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Refresh button
+                GestureDetector(
+                  onTap: () => setState(() => _loadDocuments()),
+                  child: Container(
+                    padding: const EdgeInsets.all(9),
+                    decoration: BoxDecoration(
+                      // ignore: deprecated_member_use
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.refresh_rounded,
+                      color: Colors.white,
+                      size: 18,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
 
-          // ✅ Container abu mengisi sisa layar
+          // ===== CONTENT =====
           Expanded(
             child: Container(
+              width: double.infinity,
               decoration: const BoxDecoration(
-                color: Color(0xFFE0E0E0),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 10,
-                    offset: Offset(0, -5),
-                  ),
-                ],
+                color: Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
               ),
               child: FutureBuilder<List<DocumentListModel>>(
                 future: _futureDocuments,
                 builder: (context, snapshot) {
                   // Loading
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(
+                      child: CircularProgressIndicator(color: kAccentBlue),
+                    );
                   }
 
                   // Error
@@ -88,30 +118,64 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         err.contains('Failed host lookup');
                     return Center(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 32),
+                        padding: const EdgeInsets.symmetric(horizontal: 40),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
-                              isNetworkError
-                                  ? Icons.wifi_off
-                                  : Icons.error_outline,
-                              size: 60,
-                              color: Colors.grey,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              isNetworkError
-                                  ? 'Tidak dapat terhubung ke server.\nPeriksa koneksi internet Anda.'
-                                  : 'Terjadi kesalahan. Coba lagi.',
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(color: Colors.red),
+                            Container(
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                // ignore: deprecated_member_use
+                                color: Colors.red.withOpacity(0.08),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                isNetworkError
+                                    ? Icons.wifi_off_rounded
+                                    : Icons.error_outline_rounded,
+                                size: 48,
+                                color: Colors.red.shade400,
+                              ),
                             ),
                             const SizedBox(height: 16),
+                            Text(
+                              isNetworkError
+                                  ? 'Tidak dapat terhubung ke server'
+                                  : 'Terjadi kesalahan',
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: kTextDark,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              isNetworkError
+                                  ? 'Periksa koneksi internet Anda dan coba lagi.'
+                                  : 'Silakan coba beberapa saat lagi.',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: kTextMuted,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
                             ElevatedButton.icon(
                               onPressed: () => setState(() => _loadDocuments()),
-                              icon: const Icon(Icons.refresh),
+                              icon: const Icon(Icons.refresh_rounded, size: 16),
                               label: const Text('Coba Lagi'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: kAccentBlue,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 12,
+                                ),
+                                elevation: 0,
+                              ),
                             ),
                           ],
                         ),
@@ -124,35 +188,52 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   // Empty state
                   if (documents.isEmpty) {
                     return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset(
-                            'assets/images/searchdata.png',
-                            width: 300,
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'Belum ada dokumen',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.black,
-                              fontWeight: FontWeight.w500,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 40),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                // ignore: deprecated_member_use
+                                color: kAccentBlue.withOpacity(0.08),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.inbox_rounded,
+                                size: 52,
+                                color: kAccentBlue,
+                              ),
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 16),
+                            const Text(
+                              'Belum ada dokumen',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: kTextDark,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            const Text(
+                              'Dokumen yang dikirim akan muncul di sini.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 13, color: kTextMuted),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   }
 
-                  // ✅ ListView.builder menggantikan Column + map (lebih efisien)
                   return ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(15, 15, 15, 20),
+                    padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
                     itemCount: documents.length,
                     itemBuilder: (context, index) {
                       final doc = documents[index];
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.only(bottom: 12),
                         child: _buildDocumentCard(doc),
                       );
                     },
@@ -167,21 +248,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Widget _buildDocumentCard(DocumentListModel doc) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            // ignore: deprecated_member_use
-            color: Colors.black54.withOpacity(0.15),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () async {
@@ -215,140 +284,200 @@ class _HistoryScreenState extends State<HistoryScreen> {
               );
             },
           );
-
-          // ✅ Refresh jika ada delete
-          if (result == true) {
-            setState(() => _loadDocuments());
-          }
+          if (result == true) setState(() => _loadDocuments());
         },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Status & Date
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                // ignore: deprecated_member_use
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Status row ──
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      // ignore: deprecated_member_use
+                      color: const Color(0xFF059669).withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(
+                          Icons.check_circle_rounded,
+                          size: 12,
+                          color: Color(0xFF059669),
+                        ),
+                        SizedBox(width: 4),
+                        Text(
+                          'Completed',
+                          style: TextStyle(
+                            color: Color(0xFF059669),
+                            fontWeight: FontWeight.w700,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 8, 255, 210),
-                    borderRadius: BorderRadius.circular(5),
-                    boxShadow: [
-                      BoxShadow(
-                        // ignore: deprecated_member_use
-                        color: Colors.black54.withOpacity(0.15),
-                        blurRadius: 3,
-                        offset: const Offset(0, 3),
+                  const Spacer(),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.calendar_today_rounded,
+                        size: 11,
+                        color: kTextMuted,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        _formatDate(doc.createdAt),
+                        style: const TextStyle(
+                          color: kTextMuted,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ],
                   ),
-                  child: const Text(
-                    "Completed",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
+                ],
+              ),
+
+              const SizedBox(height: 12),
+              const Divider(height: 1, color: kLightBg),
+              const SizedBox(height: 12),
+
+              // ── FROM ──
+              Row(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      // ignore: deprecated_member_use
+                      color: kAccentBlue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Image.asset(
+                      'assets/icons/up.png',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          doc.senderCompany,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                            color: kTextDark,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Dari ${doc.senderName}',
+                          style: const TextStyle(
+                            color: kTextMuted,
+                            fontSize: 11,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              // ── Connector line ──
+              Padding(
+                padding: const EdgeInsets.only(left: 19),
+                child: Column(
+                  children: List.generate(
+                    3,
+                    (_) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      child: Container(
+                        width: 2,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: kBorderColor,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-                Text(
-                  _formatDate(doc.createdAt),
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
+              ),
 
-            const SizedBox(height: 2),
-            Divider(thickness: 2, color: Colors.grey.shade300),
-            const SizedBox(height: 5),
-
-            // FROM
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade100,
-                    borderRadius: BorderRadius.circular(8),
+              // ── TO ──
+              Row(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      // ignore: deprecated_member_use
+                      color: const Color(0xFFD97706).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Image.asset(
+                      'assets/icons/location.png',
+                      fit: BoxFit.contain,
+                    ),
                   ),
-                  child: Image.asset('assets/icons/up.png'),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        doc.senderCompany,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                        overflow: TextOverflow
-                            .ellipsis, // ✅ teks panjang tidak overflow
-                      ),
-                      const SizedBox(height: 1),
-                      Text(
-                        "From ${doc.senderName}",
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontSize: 12,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          doc.receiverCompany,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                            color: kTextDark,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            // TO
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: Colors.orange.shade100,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Image.asset('assets/icons/location.png'),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        doc.receiverCompany,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                        overflow: TextOverflow
-                            .ellipsis, // ✅ teks panjang tidak overflow
-                      ),
-                      const SizedBox(height: 1),
-                      Text(
-                        "To ${doc.receiverName}",
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontSize: 12,
+                        const SizedBox(height: 2),
+                        Text(
+                          'Kepada ${doc.receiverName}',
+                          style: const TextStyle(
+                            color: kTextMuted,
+                            fontSize: 11,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                  const Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 13,
+                    color: kBorderColor,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
