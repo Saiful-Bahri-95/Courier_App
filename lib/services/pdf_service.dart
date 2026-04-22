@@ -410,6 +410,7 @@ class PdfService {
       );
       await file.writeAsBytes(await pdf.save());
 
+      // ignore: deprecated_member_use
       await Share.shareXFiles(
         [XFile(file.path, mimeType: 'application/pdf')],
         text:

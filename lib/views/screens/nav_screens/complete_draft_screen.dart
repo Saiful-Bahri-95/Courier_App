@@ -720,6 +720,7 @@ class _CompleteDraftScreenState extends ConsumerState<CompleteDraftScreen> {
               (route) => false,
             );
           } catch (e) {
+            if (!mounted) return;
             Navigator.pop(context);
             showSnackbar(context, e.toString());
           }
