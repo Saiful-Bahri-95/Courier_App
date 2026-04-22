@@ -161,8 +161,8 @@ class AccountScreen extends ConsumerWidget {
                         _SettingTile(
                           icon: Icons.help_rounded,
                           iconColor: const Color(0xFFD97706),
-                          title: 'Bantuan',
-                          subtitle: 'FAQ & dukungan',
+                          title: 'Tentang Aplikasi',
+                          subtitle: 'Informasi versi dan pengembang',
                           onTap: () {},
                         ),
                       ],

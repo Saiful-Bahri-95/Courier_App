@@ -3,7 +3,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     
     <application
-        android:label="store_app"
+        android:label="Courier App"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

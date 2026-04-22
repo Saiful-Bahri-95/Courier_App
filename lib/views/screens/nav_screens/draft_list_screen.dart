@@ -83,7 +83,7 @@ class _DraftListScreenState extends State<DraftListScreen> {
                           Container(
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              color: kAccentBlue.withOpacity(0.08),
+                              color: kAccentBlue.withValues(alpha: 0.08),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
@@ -162,7 +162,7 @@ class _DraftListScreenState extends State<DraftListScreen> {
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Icon(
@@ -188,7 +188,7 @@ class _DraftListScreenState extends State<DraftListScreen> {
                 'Lengkapi tanda tangan di lokasi',
                 style: TextStyle(
                   fontSize: 13,
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -227,7 +227,7 @@ class _DraftCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 8,
                 offset: const Offset(0, 3),
               ),
@@ -279,7 +279,7 @@ class _DraftCard extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.08),
+                        color: Colors.red.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: const Icon(
@@ -303,7 +303,7 @@ class _DraftCard extends StatelessWidget {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: kAccentBlue.withOpacity(0.1),
+                      color: kAccentBlue.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(
@@ -367,7 +367,7 @@ class _DraftCard extends StatelessWidget {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFD97706).withOpacity(0.1),
+                      color: const Color(0xFFD97706).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(
@@ -406,7 +406,7 @@ class _DraftCard extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF16A34A).withOpacity(0.1),
+                      color: const Color(0xFF16A34A).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Row(
@@ -440,7 +440,7 @@ class _DraftCard extends StatelessWidget {
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: kAccentBlue.withOpacity(0.08),
+                    color: kAccentBlue.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(

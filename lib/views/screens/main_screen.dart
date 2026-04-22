@@ -5,6 +5,7 @@ import 'package:store_app/views/screens/nav_screens/account_screen.dart';
 import 'package:store_app/views/screens/nav_screens/history_screen.dart';
 import 'package:store_app/views/screens/nav_screens/home_screen.dart';
 import 'package:store_app/views/screens/nav_screens/send_screen.dart';
+import 'package:store_app/views/screens/utils.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -17,9 +18,9 @@ class _MainScreenState extends State<MainScreen> {
   int _pageIndex = 0;
 
   final List<Widget> _pages = [
-    HomeScreen(),
-    SendScreen(),
-    HistoryScreen(),
+    const HomeScreen(),
+    const SendScreen(),
+    const HistoryScreen(),
     AccountScreen(),
   ];
 
@@ -27,38 +28,34 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 250),
-        child: _pages[_pageIndex],
+        duration: const Duration(milliseconds: 200),
+        switchInCurve: Curves.easeOut,
+        switchOutCurve: Curves.easeIn,
+        child: KeyedSubtree(
+          key: ValueKey<int>(_pageIndex),
+          child: _pages[_pageIndex],
+        ),
       ),
 
-      /// ✅ CONVEX BOTTOM BAR (FamilyMart style)
       bottomNavigationBar: ConvexAppBar(
-        style: TabStyle.reactCircle, // 🔥 efek ikon naik keluar
-        height: 60,
-        gradient: const LinearGradient(
-          colors: [
-            Color.fromARGB(255, 12, 210, 255),
-            Color.fromARGB(255, 255, 255, 255),
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-        activeColor: Color(0xFF030F2F),
-        color: const Color.fromARGB(255, 114, 75, 75),
+        style: TabStyle.reactCircle,
+        height: 58,
+        backgroundColor: kNavyBlue,
+        activeColor: Colors.white,
+        color: Colors.white54,
+        elevation: 12,
+        curveSize: 80,
+        top: -24,
 
         items: const [
-          TabItem(icon: Icons.home_work, title: 'Home'),
+          TabItem(icon: Icons.home_rounded, title: 'Home'),
           TabItem(icon: Icons.send_rounded, title: 'Send'),
-          TabItem(icon: Icons.history_edu, title: 'History'),
-          TabItem(icon: Icons.person_outline, title: 'Account'),
+          TabItem(icon: Icons.history_rounded, title: 'History'),
+          TabItem(icon: Icons.person_rounded, title: 'Account'),
         ],
 
         initialActiveIndex: _pageIndex,
-        onTap: (int index) {
-          setState(() {
-            _pageIndex = index;
-          });
-        },
+        onTap: (int index) => setState(() => _pageIndex = index),
       ),
     );
   }

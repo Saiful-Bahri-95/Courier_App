@@ -54,6 +54,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.1
+  flutter_native_splash: ^2.4.1
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -109,3 +111,18 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/app_icon.png"  # path ke icon kamu
+  min_sdk_android: 21
+  adaptive_icon_background: "#1A3C8F"      # kNavyBlue — warna background icon Android
+  adaptive_icon_foreground: "assets/icons/app_icon_foreground.png"
+
+flutter_native_splash:
+  color: "#1A3C8F"           # kNavyBlue
+  image: assets/icons/app_icon.png
+  android_12:
+    color: "#1A3C8F"
+    image: assets/icons/app_icon.png
+

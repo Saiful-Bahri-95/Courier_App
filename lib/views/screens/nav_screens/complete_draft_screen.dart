@@ -129,9 +129,9 @@ class _CompleteDraftScreenState extends ConsumerState<CompleteDraftScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
+          color: color.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(0.2)),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
         ),
         child: Row(
           children: [
@@ -246,7 +246,7 @@ class _CompleteDraftScreenState extends ConsumerState<CompleteDraftScreen> {
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Icon(
@@ -272,7 +272,7 @@ class _CompleteDraftScreenState extends ConsumerState<CompleteDraftScreen> {
                 'Tanda tangan & foto bukti',
                 style: TextStyle(
                   fontSize: 13,
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -312,7 +312,7 @@ class _CompleteDraftScreenState extends ConsumerState<CompleteDraftScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: const Text(
@@ -398,7 +398,7 @@ class _CompleteDraftScreenState extends ConsumerState<CompleteDraftScreen> {
                 boxShadow: isSelected
                     ? [
                         BoxShadow(
-                          color: kAccentBlue.withOpacity(0.3),
+                          color: kAccentBlue.withValues(alpha: 0.3),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -507,7 +507,7 @@ class _CompleteDraftScreenState extends ConsumerState<CompleteDraftScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: kAccentBlue.withOpacity(0.1),
+                      color: kAccentBlue.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -708,22 +708,19 @@ class _CompleteDraftScreenState extends ConsumerState<CompleteDraftScreen> {
             // Hapus draft setelah berhasil submit
             await DraftService.delete(widget.draft.id);
 
-            // ignore: use_build_context_synchronously
+            if (!mounted) return;
+
             Navigator.pop(context); // tutup loading
 
-            // ignore: use_build_context_synchronously
             showSnackbar(context, 'Dokumen berhasil dikirim ✅');
 
-            // ignore: use_build_context_synchronously
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (_) => const MainScreen()),
               (route) => false,
             );
           } catch (e) {
-            // ignore: use_build_context_synchronously
             Navigator.pop(context);
-            // ignore: use_build_context_synchronously
             showSnackbar(context, e.toString());
           }
         },
