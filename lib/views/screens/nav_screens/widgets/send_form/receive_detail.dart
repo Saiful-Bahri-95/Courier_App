@@ -185,6 +185,7 @@ class _ReceiverDetailScreenState extends State<ReceiverDetailScreen> {
                       icon: Icons.phone_rounded,
                       controller: phoneCtrl,
                       keyboardType: TextInputType.phone,
+                      validator: (_) => null, // ← tidak wajib diisi
                     ),
                     const SizedBox(height: 8),
                     buildSectionLabel('Bukti Penerimaan'),
