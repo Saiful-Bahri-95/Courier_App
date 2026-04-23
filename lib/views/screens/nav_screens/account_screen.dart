@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:store_app/controllers/auth_controller.dart';
 import 'package:store_app/provider/user_provider.dart';
+import 'package:store_app/views/screens/nav_screens/widgets/about_screen.dart';
 import 'package:store_app/views/screens/nav_screens/widgets/edit_profile_screen.dart';
+import 'package:store_app/views/screens/nav_screens/widgets/report_bug_screen.dart';
 import 'package:store_app/views/screens/utils.dart';
 
 class AccountScreen extends ConsumerWidget {
@@ -152,18 +154,32 @@ class AccountScreen extends ConsumerWidget {
                     _settingsCard(
                       children: [
                         _SettingTile(
-                          icon: Icons.settings_rounded,
+                          icon: Icons.bug_report_rounded,
                           iconColor: const Color(0xFF059669),
-                          title: 'Pengaturan',
-                          subtitle: 'Preferensi aplikasi',
-                          onTap: () {},
+                          title: 'Laporkan Bug',
+                          subtitle: 'Bantu kami meningkatkan aplikasi',
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ReportBugScreen(),
+                              ),
+                            );
+                          },
                         ),
                         _SettingTile(
                           icon: Icons.help_rounded,
                           iconColor: const Color(0xFFD97706),
                           title: 'Tentang Aplikasi',
                           subtitle: 'Informasi versi dan pengembang',
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const AboutScreen(),
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),

@@ -152,6 +152,24 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return Row(
       key: const ValueKey('header'),
       children: [
+        if (Navigator.canPop(context)) ...[
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              padding: const EdgeInsets.all(9),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.arrow_back_ios_new,
+                color: Colors.white,
+                size: 18,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+        ],
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,8 +187,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 'Riwayat pengiriman dokumen',
                 style: TextStyle(
                   fontSize: 13,
-                  // ignore: deprecated_member_use
-                  color: Colors.white.withOpacity(0.65),
+
+                  color: Colors.white.withValues(alpha: 0.65),
                 ),
               ),
             ],
@@ -248,7 +266,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 14),
             decoration: BoxDecoration(
               // ignore: deprecated_member_use
-              color: Colors.white.withOpacity(0.15),
+              color: Colors.white.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
             ),
             alignment: Alignment.center,
@@ -278,7 +296,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 // ignore: deprecated_member_use
-                color: Colors.red.withOpacity(0.08),
+                color: Colors.red.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -343,8 +361,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                // ignore: deprecated_member_use
-                color: kAccentBlue.withOpacity(0.08),
+                color: kAccentBlue.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -385,8 +402,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                // ignore: deprecated_member_use
-                color: kTextMuted.withOpacity(0.08),
+                color: kTextMuted.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: const Icon(

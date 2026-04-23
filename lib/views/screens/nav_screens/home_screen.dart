@@ -4,9 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:store_app/models/document_list_model.dart';
 import 'package:store_app/services/document_service.dart';
 import 'package:store_app/views/screens/nav_screens/draft_list_screen.dart';
+import 'package:store_app/views/screens/nav_screens/history_screen.dart';
 import 'package:store_app/views/screens/nav_screens/send_screen.dart';
 import 'package:store_app/views/screens/nav_screens/widgets/header_widget.dart';
 import 'package:store_app/views/screens/nav_screens/widgets/preview_history.dart';
+import 'package:store_app/views/screens/nav_screens/widgets/report_screen.dart';
 import 'package:store_app/views/screens/utils.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -165,7 +167,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         icon: Icons.history_rounded,
         iconBg: const Color(0xFFFFF7ED),
         iconColor: const Color(0xFFD97706),
-        onTap: () {},
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const HistoryScreen()),
+          );
+        },
       ),
       _QuickAction(
         label: 'Unduh PDF',
@@ -173,7 +180,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         icon: Icons.picture_as_pdf_rounded,
         iconBg: const Color(0xFFFDF4FF),
         iconColor: const Color(0xFF7C3AED),
-        onTap: () {},
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ReportScreen()),
+          );
+        },
       ),
     ];
 

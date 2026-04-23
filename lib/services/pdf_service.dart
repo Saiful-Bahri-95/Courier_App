@@ -150,7 +150,7 @@ class PdfService {
                         ttf: ttf,
                         ttfBold: ttfBold,
                         rows: [
-                          _InfoRow('Perusahaan', data.receiverCompany ?? '-'),
+                          _InfoRow('Alamat', data.receiverCompany ?? '-'),
                           _InfoRow('Nama', data.receiverName ?? '-'),
                           _InfoRow('Telepon', data.receiverPhone ?? '-'),
                         ],
@@ -410,14 +410,16 @@ class PdfService {
       );
       await file.writeAsBytes(await pdf.save());
 
-      // ignore: deprecated_member_use
-      await Share.shareXFiles(
-        [XFile(file.path, mimeType: 'application/pdf')],
-        text:
-            'Tanda Terima - ${data.senderCompany ?? ''} ke ${data.receiverCompany ?? ''}',
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path, mimeType: 'application/pdf')],
+          text:
+              'Tanda Terima - ${data.senderCompany ?? ''} ke ${data.receiverCompany ?? ''}',
+        ),
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
       debugPrint('❌ PDF ERROR: $e');
+      debugPrint('Stack trace: $stackTrace');
       // ignore: use_build_context_synchronously
       showSnackbar(context, 'Gagal membuat PDF: $e');
     }
