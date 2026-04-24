@@ -6,7 +6,12 @@ import 'send_form_widgets.dart';
 
 class SenderDetail extends StatefulWidget {
   final DocumentData documentData;
-  const SenderDetail({super.key, required this.documentData});
+  final bool isDraft;
+  const SenderDetail({
+    super.key,
+    required this.documentData,
+    this.isDraft = false,
+  });
 
   @override
   State<SenderDetail> createState() => _SenderDetailState();
@@ -194,8 +199,10 @@ class _SenderDetailState extends State<SenderDetail> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) =>
-                    ReceiverDetailScreen(documentData: widget.documentData),
+                builder: (_) => ReceiverDetailScreen(
+                  documentData: widget.documentData,
+                  isDraft: widget.isDraft,
+                ),
               ),
             );
           }

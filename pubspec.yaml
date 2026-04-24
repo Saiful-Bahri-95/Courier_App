@@ -117,10 +117,10 @@ flutter_launcher_icons:
   image_path: "assets/icons/app_icon.png"  # path ke icon kamu
   min_sdk_android: 21
   adaptive_icon_background: "#FFFFFF"      # kNavyBlue — warna background icon Android
-  adaptive_icon_foreground: "assets/icons/app_icon_foreground.png"
+  adaptive_icon_foreground: "assets/icons/app_icon.png"
 
 flutter_native_splash:
-  color: "#FFFFFF"           # kNavyBlue
+  color: "#FFFFFF"
   image: assets/icons/app_icon.png
   android_12:
     color: "#FFFFFF"

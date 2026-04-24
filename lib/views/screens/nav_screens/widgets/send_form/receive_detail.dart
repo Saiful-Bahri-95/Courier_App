@@ -10,7 +10,12 @@ import 'send_form_widgets.dart';
 
 class ReceiverDetailScreen extends StatefulWidget {
   final DocumentData documentData;
-  const ReceiverDetailScreen({super.key, required this.documentData});
+  final bool isDraft; // ← tambah ini
+  const ReceiverDetailScreen({
+    super.key,
+    required this.documentData,
+    this.isDraft = false,
+  });
 
   @override
   State<ReceiverDetailScreen> createState() => _ReceiverDetailScreenState();
@@ -196,98 +201,134 @@ class _ReceiverDetailScreenState extends State<ReceiverDetailScreen> {
                     ),
                     const SizedBox(height: 10),
                     _buildImagePicker(),
+                    // Ganti bagian buildBottomNavButtons dan TextButton.icon dengan:
                     const SizedBox(height: 28),
-                    buildBottomNavButtons(
-                      context: context,
-                      nextLabel: 'Selanjutnya',
-                      nextIcon: Icons.arrow_forward_rounded,
-                      onNext: () {
-                        if (_formKey.currentState!.validate()) {
-                          widget.documentData
-                            ..receiverCompany = companyCtrl.text.trim()
-                            ..receiverName = receiverCtrl.text.trim()
-                            ..receiverPhone = phoneCtrl.text.trim()
-                            ..receiverImage = receiverImage;
 
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  SignDetail(documentData: widget.documentData),
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                    // Tambah tombol simpan draft setelah _buildBottomButtons()
-                    const SizedBox(height: 10),
-                    TextButton.icon(
-                      onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          widget.documentData
-                            ..receiverCompany = companyCtrl.text.trim()
-                            ..receiverName = receiverCtrl.text.trim()
-                            ..receiverPhone = phoneCtrl.text.trim();
+                    widget.isDraft
+                        // ===== MODE DRAFT: hanya tombol simpan =====
+                        ? SizedBox(
+                            width: double.infinity,
+                            height: 52,
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                if (_formKey.currentState!.validate()) {
+                                  widget.documentData
+                                    ..receiverCompany = companyCtrl.text.trim()
+                                    ..receiverName = receiverCtrl.text.trim()
+                                    ..receiverPhone = phoneCtrl.text.trim();
 
-                          final draft = DraftDocument(
-                            id: DateTime.now().millisecondsSinceEpoch
-                                .toString(),
-                            senderCompany:
-                                widget.documentData.senderCompany ?? '',
-                            senderName: widget.documentData.senderName ?? '',
-                            senderPhone: widget.documentData.senderPhone ?? '',
-                            receiverCompany:
-                                widget.documentData.receiverCompany ?? '',
-                            receiverName:
-                                widget.documentData.receiverName ?? '',
-                            receiverPhone:
-                                widget.documentData.receiverPhone ?? '',
-                            documentType: widget.documentData.documentType,
-                            description: widget.documentData.description,
-                            createdAt: DateTime.now(),
-                          );
+                                  final draft = DraftDocument(
+                                    id: DateTime.now().millisecondsSinceEpoch
+                                        .toString(),
+                                    senderCompany:
+                                        widget.documentData.senderCompany ?? '',
+                                    senderName:
+                                        widget.documentData.senderName ?? '',
+                                    senderPhone:
+                                        widget.documentData.senderPhone ?? '',
+                                    receiverCompany:
+                                        widget.documentData.receiverCompany ??
+                                        '',
+                                    receiverName:
+                                        widget.documentData.receiverName ?? '',
+                                    receiverPhone:
+                                        widget.documentData.receiverPhone ?? '',
+                                    documentType:
+                                        widget.documentData.documentType,
+                                    description:
+                                        widget.documentData.description,
+                                    createdAt: DateTime.now(),
+                                  );
 
-                          await DraftService.save(draft);
+                                  await DraftService.save(draft);
 
-                          // ignore: use_build_context_synchronously
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: const Row(
+                                  // ignore: use_build_context_synchronously
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: const Row(
+                                        children: [
+                                          Icon(
+                                            Icons.check_circle_rounded,
+                                            color: Colors.white,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text('Draft berhasil disimpan'),
+                                        ],
+                                      ),
+                                      backgroundColor: const Color(0xFF16A34A),
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                  );
+
+                                  // ignore: use_build_context_synchronously
+                                  Navigator.of(context).pushAndRemoveUntil(
+                                    MaterialPageRoute(
+                                      builder: (_) => const MainScreen(),
+                                    ),
+                                    (route) => false,
+                                  );
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFD97706),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(
-                                    Icons.check_circle_rounded,
+                                    Icons.save_rounded,
                                     color: Colors.white,
+                                    size: 18,
                                   ),
                                   SizedBox(width: 8),
-                                  Text('Draft berhasil disimpan'),
+                                  Text(
+                                    'Simpan Draft',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
                                 ],
                               ),
-                              backgroundColor: const Color(0xFF16A34A),
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+                            ),
+                          )
+                        // ===== MODE KIRIM: tombol next + simpan draft =====
+                        : Column(
+                            children: [
+                              buildBottomNavButtons(
+                                context: context,
+                                nextLabel: 'Selanjutnya',
+                                nextIcon: Icons.arrow_forward_rounded,
+                                onNext: () {
+                                  if (_formKey.currentState!.validate()) {
+                                    widget.documentData
+                                      ..receiverCompany = companyCtrl.text
+                                          .trim()
+                                      ..receiverName = receiverCtrl.text.trim()
+                                      ..receiverPhone = phoneCtrl.text.trim()
+                                      ..receiverImage = receiverImage;
+
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => SignDetail(
+                                          documentData: widget.documentData,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
                               ),
-                            ),
-                          );
-                          // ignore: use_build_context_synchronously
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                              builder: (_) => const MainScreen(),
-                            ),
-                            (route) => false,
-                          );
-                        }
-                      },
-                      icon: const Icon(
-                        Icons.save_outlined,
-                        size: 16,
-                        color: kTextMuted,
-                      ),
-                      label: const Text(
-                        'Simpan sebagai Draft',
-                        style: TextStyle(color: kTextMuted, fontSize: 13),
-                      ),
-                    ),
+                            ],
+                          ),
                   ],
                 ),
               ),
