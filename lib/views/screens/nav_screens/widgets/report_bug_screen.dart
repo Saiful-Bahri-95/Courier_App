@@ -1,6 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
+import 'package:store_app/config/globar_variable.dart';
 import 'package:store_app/provider/user_provider.dart';
+import 'package:store_app/services/auth_secure_storage.dart';
 import 'package:store_app/views/screens/utils.dart';
 
 class ReportBugScreen extends ConsumerStatefulWidget {
@@ -63,13 +68,63 @@ class _ReportBugScreenState extends ConsumerState<ReportBugScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final user = ref.read(userProvider);
+    if (user == null) return;
+
     setState(() => _isSubmitting = true);
-    // Simulasi submit (bisa dihubungkan ke API/email nanti)
-    await Future.delayed(const Duration(seconds: 2));
-    setState(() {
-      _isSubmitting = false;
-      _isSubmitted = true;
-    });
+
+    try {
+      final token = await AuthSecureStorage.getToken();
+
+      final response = await http.post(
+        Uri.parse('${ApiConfig.baseUrl}/api/report-bug'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'category': _selectedCategory,
+          'priority': _selectedPriority,
+          'description': _descCtrl.text.trim(),
+          'reporterName': user.fullname,
+          'reporterEmail': user.email,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _isSubmitting = false;
+          _isSubmitted = true;
+        });
+      } else {
+        final data = jsonDecode(response.body);
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(data['message'] ?? 'Gagal mengirim laporan'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+        setState(() => _isSubmitting = false);
+      }
+    } catch (e) {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+      setState(() => _isSubmitting = false);
+    }
   }
 
   void _reset() {
@@ -398,40 +453,6 @@ class _ReportBugScreenState extends ConsumerState<ReportBugScreen> {
                 return null;
               },
             ),
-
-            const SizedBox(height: 20),
-
-            // Langkah reproduksi
-            _sectionLabel('Langkah Reproduksi (Opsional)'),
-            const SizedBox(height: 6),
-            Text(
-              'Bagaimana cara memunculkan bug ini?',
-              style: const TextStyle(fontSize: 12, color: kTextMuted),
-            ),
-            const SizedBox(height: 10),
-            TextFormField(
-              controller: _stepsCtrl,
-              maxLines: 4,
-              minLines: 3,
-              style: const TextStyle(fontSize: 14, color: kTextDark),
-              decoration: InputDecoration(
-                hintText:
-                    '1. Buka halaman...\n2. Klik tombol...\n3. Bug muncul...',
-                hintStyle: const TextStyle(color: kTextMuted, fontSize: 13),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.all(14),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: kBorderColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: kAccentBlue, width: 1.5),
-                ),
-              ),
-            ),
-
             const SizedBox(height: 28),
 
             // Submit button

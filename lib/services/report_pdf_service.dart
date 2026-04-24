@@ -67,6 +67,13 @@ class ReportPdfService {
       final topSenders = bySender.entries.toList()
         ..sort((a, b) => b.value.compareTo(a.value));
 
+      // Tambah setelah load signature image
+      pw.MemoryImage? logoImage;
+      try {
+        final logoData = await rootBundle.load('assets/icons/app_icon.png');
+        logoImage = pw.MemoryImage(logoData.buffer.asUint8List());
+      } catch (_) {}
+
       final pdf = pw.Document();
 
       pdf.addPage(
@@ -85,21 +92,41 @@ class ReportPdfService {
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  pw.Row(
+                    crossAxisAlignment: pw.CrossAxisAlignment.center,
                     children: [
-                      pw.Text(
-                        'PT KGI SEKURITAS INDONESIA',
-                        style: bold(size: 14, color: PdfColors.white),
-                      ),
-                      pw.SizedBox(height: 3),
-                      pw.Text(
-                        'Sona Topas Tower Lt. 11, Jl. Jend. Sudirman Kav. 26',
-                        style: base(size: 8, color: PdfColors.white),
-                      ),
-                      pw.Text(
-                        'Jakarta 12920  |  (021) 250 5337',
-                        style: base(size: 8, color: PdfColors.white),
+                      // Logo
+                      if (logoImage != null) ...[
+                        pw.Container(
+                          width: 48,
+                          height: 48,
+                          decoration: pw.BoxDecoration(
+                            color: PdfColors.white,
+                            borderRadius: pw.BorderRadius.circular(2),
+                          ),
+                          padding: const pw.EdgeInsets.all(4),
+                          child: pw.Image(logoImage, fit: pw.BoxFit.contain),
+                        ),
+                        pw.SizedBox(width: 8),
+                      ],
+                      // Teks
+                      pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Text(
+                            'PT KGI SEKURITAS INDONESIA',
+                            style: bold(size: 14, color: PdfColors.white),
+                          ),
+                          pw.SizedBox(height: 3),
+                          pw.Text(
+                            'Sona Topas Tower Lt. 11, Jl. Jend. Sudirman Kav. 26',
+                            style: base(size: 8, color: PdfColors.white),
+                          ),
+                          pw.Text(
+                            'Jakarta 12920  |  (021) 250 5337 - 250 5338',
+                            style: base(size: 8, color: PdfColors.white),
+                          ),
+                        ],
                       ),
                     ],
                   ),

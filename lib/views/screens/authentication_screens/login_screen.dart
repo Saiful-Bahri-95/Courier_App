@@ -17,6 +17,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final AuthController _authController = AuthController();
 
+  // Palet warna terpusat agar mudah di-maintain
+  static const Color _primaryColor = Color(0xFF0A68FF);
+  static const Color _primaryDark = Color(0xFF225BCE);
+  static const Color _textDark = Color(0xFF030F2F);
+  static const Color _textMuted = Color(0xFF6B7280);
+  static const Color _fieldFill = Color(0xFFF3F4F6);
+  static const Color _fieldBorder = Color(0xFFE5E7EB);
+
   String email = '';
   String password = '';
   bool _isLoading = false;
@@ -29,7 +37,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     await _authController.signInUser(
       context: context,
-      ref: ref, // ✅ SEKARANG VALID
+      ref: ref,
       email: email,
       password: password,
     );
@@ -42,7 +50,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF030F2F),
+      backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(15.0),
         child: Center(
@@ -57,19 +65,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     style: GoogleFonts.getFont(
                       'Poppins',
                       fontSize: 23,
-                      color: Colors.white,
+                      color: _textDark,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
                     'Hello again, you\'ve been missed!',
-                    style: GoogleFonts.getFont('Lato', color: Colors.white),
+                    style: GoogleFonts.getFont('Lato', color: _textMuted),
                   ),
                   SizedBox(height: 20),
-                  Image.asset(
-                    'assets/images/banner2.png',
-                    width: 150,
+                  Container(
+                    width: 300,
                     height: 150,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                    padding: const EdgeInsets.all(4),
+                    child: Image.asset(
+                      'assets/icons/app_icon_foreground.png',
+                      width: 300,
+                      height: 150,
+                    ),
                   ),
                   SizedBox(height: 20),
                   Align(
@@ -80,7 +97,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         'Poppins',
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.2,
-                        color: Colors.white,
+                        color: _textDark,
                       ),
                     ),
                   ),
@@ -95,13 +112,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       }
                       return null;
                     },
+                    style: GoogleFonts.poppins(fontSize: 14, color: _textDark),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: Colors.white,
-
+                      fillColor: _fieldFill,
                       hintText: 'Enter your email',
-                      hintStyle: GoogleFonts.poppins(fontSize: 14),
-
+                      hintStyle: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: _textMuted,
+                      ),
                       prefixIcon: Padding(
                         padding: const EdgeInsets.all(10.0),
                         child: Image.asset(
@@ -112,16 +131,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
-                        borderSide: BorderSide.none,
+                        borderSide: BorderSide(color: _fieldBorder),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
-                        borderSide: BorderSide.none,
+                        borderSide: BorderSide(color: _fieldBorder),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
                         borderSide: BorderSide(
-                          color: Color(0xFF0A68FF),
+                          color: _primaryColor,
                           width: 1.5,
                         ),
                       ),
@@ -136,7 +155,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         'Poppins',
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.2,
-                        color: Colors.white,
+                        color: _textDark,
                       ),
                     ),
                   ),
@@ -155,13 +174,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       }
                       return null;
                     },
+                    style: GoogleFonts.poppins(fontSize: 14, color: _textDark),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: Colors.white,
-
+                      fillColor: _fieldFill,
                       hintText: 'Enter your password',
-                      hintStyle: GoogleFonts.poppins(fontSize: 14),
-
+                      hintStyle: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: _textMuted,
+                      ),
                       prefixIcon: Padding(
                         padding: const EdgeInsets.all(10.0),
                         child: Image.asset(
@@ -173,6 +194,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscure ? Icons.visibility : Icons.visibility_off,
+                          color: _textMuted,
                         ),
                         onPressed: () {
                           setState(() {
@@ -180,19 +202,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           });
                         },
                       ),
-
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
-                        borderSide: BorderSide.none,
+                        borderSide: BorderSide(color: _fieldBorder),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
-                        borderSide: BorderSide.none,
+                        borderSide: BorderSide(color: _fieldBorder),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
                         borderSide: BorderSide(
-                          color: Color(0xFF0A68FF),
+                          color: _primaryColor,
                           width: 1.5,
                         ),
                       ),
@@ -214,7 +235,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         'Forgot Password',
                         style: GoogleFonts.getFont(
                           'Poppins',
-                          color: const Color.fromARGB(255, 255, 0, 0),
+                          color: const Color(0xFFE11D48),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -224,21 +245,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   InkWell(
                     onTap: () {
                       if (_formKey.currentState!.validate()) {
-                        // Process data.
                         loginUser();
                       }
                     },
+                    borderRadius: BorderRadius.circular(20),
                     child: Container(
                       width: 355,
                       height: 60,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
-                        gradient: LinearGradient(
-                          colors: [
-                            const Color.fromARGB(255, 34, 91, 206),
-                            Color.fromARGB(255, 10, 104, 255),
-                          ],
+                        gradient: const LinearGradient(
+                          colors: [_primaryDark, _primaryColor],
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: _primaryColor.withOpacity(0.25),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
                       ),
                       child: Stack(
                         children: [
@@ -270,12 +295,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         style: GoogleFonts.roboto(
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.8,
-                          color: Colors.white,
+                          color: _textDark,
                         ),
                       ),
                       InkWell(
                         onTap: () {
-                          // Navigate to Register Screen
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -286,7 +310,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         child: Text(
                           ' Sign Up',
                           style: GoogleFonts.roboto(
-                            color: const Color.fromARGB(255, 51, 121, 242),
+                            color: _primaryColor,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

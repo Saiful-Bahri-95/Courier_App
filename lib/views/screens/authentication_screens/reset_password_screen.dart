@@ -20,6 +20,15 @@ class ResetPasswordScreen extends StatefulWidget {
 
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
+
+  // Palet warna konsisten
+  static const Color _primaryColor = Color(0xFF0A68FF);
+  static const Color _primaryDark = Color(0xFF225BCE);
+  static const Color _textDark = Color(0xFF030F2F);
+  static const Color _textMuted = Color(0xFF6B7280);
+  static const Color _fieldFill = Color(0xFFF3F4F6);
+  static const Color _fieldBorder = Color(0xFFE5E7EB);
+
   String newPassword = '';
   String confirmPassword = '';
   bool _isLoading = false;
@@ -68,14 +77,51 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     setState(() => _isLoading = false);
   }
 
+  // Helper untuk decoration field password, karena dipakai 2x
+  InputDecoration _passwordDecoration({
+    required String hintText,
+    required bool obscure,
+    required VoidCallback onToggle,
+  }) {
+    return InputDecoration(
+      filled: true,
+      fillColor: _fieldFill,
+      hintText: hintText,
+      hintStyle: GoogleFonts.poppins(fontSize: 14, color: _textMuted),
+      prefixIcon: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Image.asset('assets/icons/password.png', width: 20, height: 20),
+      ),
+      suffixIcon: IconButton(
+        icon: Icon(
+          obscure ? Icons.visibility : Icons.visibility_off,
+          color: _textMuted,
+        ),
+        onPressed: onToggle,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(20),
+        borderSide: const BorderSide(color: _fieldBorder),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(20),
+        borderSide: const BorderSide(color: _fieldBorder),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(20),
+        borderSide: const BorderSide(color: _primaryColor, width: 1.5),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF030F2F),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: _textDark),
       ),
       body: Padding(
         padding: const EdgeInsets.all(15.0),
@@ -86,18 +132,33 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Container(
+                    width: 300,
+                    height: 150,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                    padding: const EdgeInsets.all(4),
+                    child: Image.asset(
+                      'assets/icons/app_icon_foreground.png',
+                      width: 300,
+                      height: 150,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                   Text(
                     'New Password 🔑',
                     style: GoogleFonts.poppins(
                       fontSize: 23,
-                      color: Colors.white,
+                      color: _textDark,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Create your new password',
-                    style: GoogleFonts.lato(color: Colors.white70),
+                    style: GoogleFonts.lato(color: _textMuted),
                   ),
                   const SizedBox(height: 40),
                   Align(
@@ -106,7 +167,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       'New Password',
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        color: _textDark,
                       ),
                     ),
                   ),
@@ -114,6 +175,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   TextFormField(
                     obscureText: _obscure1,
                     onChanged: (value) => newPassword = value,
+                    style: GoogleFonts.poppins(fontSize: 14, color: _textDark),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Password wajib diisi';
@@ -121,36 +183,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       if (value.length < 8) return 'Minimal 8 karakter';
                       return null;
                     },
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
+                    decoration: _passwordDecoration(
                       hintText: 'Enter new password',
-                      hintStyle: GoogleFonts.poppins(fontSize: 14),
-                      prefixIcon: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Image.asset(
-                          'assets/icons/password.png',
-                          width: 20,
-                          height: 20,
-                        ),
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscure1 ? Icons.visibility : Icons.visibility_off,
-                        ),
-                        onPressed: () => setState(() => _obscure1 = !_obscure1),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF0A68FF),
-                          width: 1.5,
-                        ),
-                      ),
+                      obscure: _obscure1,
+                      onToggle: () => setState(() => _obscure1 = !_obscure1),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -160,7 +196,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       'Confirm Password',
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        color: _textDark,
                       ),
                     ),
                   ),
@@ -168,6 +204,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   TextFormField(
                     obscureText: _obscure2,
                     onChanged: (value) => confirmPassword = value,
+                    style: GoogleFonts.poppins(fontSize: 14, color: _textDark),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Konfirmasi password wajib diisi';
@@ -175,36 +212,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       if (value != newPassword) return 'Password tidak cocok';
                       return null;
                     },
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
+                    decoration: _passwordDecoration(
                       hintText: 'Confirm new password',
-                      hintStyle: GoogleFonts.poppins(fontSize: 14),
-                      prefixIcon: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Image.asset(
-                          'assets/icons/password.png',
-                          width: 20,
-                          height: 20,
-                        ),
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscure2 ? Icons.visibility : Icons.visibility_off,
-                        ),
-                        onPressed: () => setState(() => _obscure2 = !_obscure2),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF0A68FF),
-                          width: 1.5,
-                        ),
-                      ),
+                      obscure: _obscure2,
+                      onToggle: () => setState(() => _obscure2 = !_obscure2),
                     ),
                   ),
                   const SizedBox(height: 30),
@@ -214,17 +225,22 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         resetPassword();
                       }
                     },
+                    borderRadius: BorderRadius.circular(20),
                     child: Container(
                       width: 355,
                       height: 60,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         gradient: const LinearGradient(
-                          colors: [
-                            Color.fromARGB(255, 34, 91, 206),
-                            Color.fromARGB(255, 10, 104, 255),
-                          ],
+                          colors: [_primaryDark, _primaryColor],
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: _primaryColor.withOpacity(0.25),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
                       ),
                       child: Center(
                         child: _isLoading

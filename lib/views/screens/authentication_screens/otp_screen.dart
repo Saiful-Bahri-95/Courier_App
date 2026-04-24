@@ -12,6 +12,15 @@ class OtpScreen extends StatefulWidget {
 
 class _OtpScreenState extends State<OtpScreen> {
   final _formKey = GlobalKey<FormState>();
+
+  // Palet warna konsisten
+  static const Color _primaryColor = Color(0xFF0A68FF);
+  static const Color _primaryDark = Color(0xFF225BCE);
+  static const Color _textDark = Color(0xFF030F2F);
+  static const Color _textMuted = Color(0xFF6B7280);
+  static const Color _fieldFill = Color(0xFFF3F4F6);
+  static const Color _fieldBorder = Color(0xFFE5E7EB);
+
   String otp = '';
   bool _isLoading = false;
 
@@ -40,11 +49,11 @@ class _OtpScreenState extends State<OtpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF030F2F),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: _textDark),
       ),
       body: Padding(
         padding: const EdgeInsets.all(15.0),
@@ -55,18 +64,33 @@ class _OtpScreenState extends State<OtpScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Container(
+                    width: 300,
+                    height: 150,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                    padding: const EdgeInsets.all(4),
+                    child: Image.asset(
+                      'assets/icons/app_icon_foreground.png',
+                      width: 300,
+                      height: 150,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                   Text(
                     'Enter OTP Code 📩',
                     style: GoogleFonts.poppins(
                       fontSize: 23,
-                      color: Colors.white,
+                      color: _textDark,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'OTP code has been sent to\n${widget.email}',
-                    style: GoogleFonts.lato(color: Colors.white70),
+                    style: GoogleFonts.lato(color: _textMuted),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 40),
@@ -76,7 +100,7 @@ class _OtpScreenState extends State<OtpScreen> {
                       'OTP Code',
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        color: _textDark,
                       ),
                     ),
                   ),
@@ -85,6 +109,11 @@ class _OtpScreenState extends State<OtpScreen> {
                     keyboardType: TextInputType.number,
                     maxLength: 6,
                     onChanged: (value) => otp = value,
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: _textDark,
+                      letterSpacing: 2,
+                    ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter OTP code';
@@ -96,22 +125,29 @@ class _OtpScreenState extends State<OtpScreen> {
                     },
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: _fieldFill,
                       hintText: 'Enter 6-digit OTP',
-                      hintStyle: GoogleFonts.poppins(fontSize: 14),
+                      hintStyle: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: _textMuted,
+                      ),
                       counterText: '',
                       prefixIcon: const Icon(
                         Icons.lock_outline,
-                        color: Colors.grey,
+                        color: _textMuted,
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
-                        borderSide: BorderSide.none,
+                        borderSide: const BorderSide(color: _fieldBorder),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: const BorderSide(color: _fieldBorder),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
                         borderSide: const BorderSide(
-                          color: Color(0xFF0A68FF),
+                          color: _primaryColor,
                           width: 1.5,
                         ),
                       ),
@@ -124,17 +160,22 @@ class _OtpScreenState extends State<OtpScreen> {
                         verifyOtp();
                       }
                     },
+                    borderRadius: BorderRadius.circular(20),
                     child: Container(
                       width: 355,
                       height: 60,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         gradient: const LinearGradient(
-                          colors: [
-                            Color.fromARGB(255, 34, 91, 206),
-                            Color.fromARGB(255, 10, 104, 255),
-                          ],
+                          colors: [_primaryDark, _primaryColor],
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: _primaryColor.withOpacity(0.25),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
                       ),
                       child: Center(
                         child: _isLoading

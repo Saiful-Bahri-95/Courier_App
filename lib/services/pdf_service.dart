@@ -56,6 +56,13 @@ class PdfService {
         } catch (_) {}
       }
 
+      // Tambah setelah load signature image
+      pw.MemoryImage? logoImage;
+      try {
+        final logoData = await rootBundle.load('assets/icons/app_icon.png');
+        logoImage = pw.MemoryImage(logoData.buffer.asUint8List());
+      } catch (_) {}
+
       final docTypes = ['Document', 'Invoice', 'BG/Cheque', 'Cash', 'Others'];
       final selectedType = data.documentType ?? '';
       final formattedDate = data.receivedDate != null
@@ -87,21 +94,44 @@ class PdfService {
                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: pw.CrossAxisAlignment.center,
                     children: [
-                      pw.Column(
-                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      pw.Row(
+                        crossAxisAlignment: pw.CrossAxisAlignment.center,
                         children: [
-                          pw.Text(
-                            'PT KGI SEKURITAS INDONESIA',
-                            style: bold(size: 14, color: PdfColors.white),
-                          ),
-                          pw.SizedBox(height: 3),
-                          pw.Text(
-                            'Sona Topas Tower Lt. 11, Jl. Jend. Sudirman Kav. 26',
-                            style: base(size: 8, color: PdfColors.white),
-                          ),
-                          pw.Text(
-                            'Jakarta 12920  |  (021) 250 5337 - 250 5338',
-                            style: base(size: 8, color: PdfColors.white),
+                          // Logo
+                          if (logoImage != null) ...[
+                            pw.Container(
+                              width: 48,
+                              height: 48,
+                              decoration: pw.BoxDecoration(
+                                color: PdfColors.white,
+                                borderRadius: pw.BorderRadius.circular(2),
+                              ),
+                              padding: const pw.EdgeInsets.all(4),
+                              child: pw.Image(
+                                logoImage,
+                                fit: pw.BoxFit.contain,
+                              ),
+                            ),
+                            pw.SizedBox(width: 8),
+                          ],
+                          // Teks
+                          pw.Column(
+                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                            children: [
+                              pw.Text(
+                                'PT KGI SEKURITAS INDONESIA',
+                                style: bold(size: 14, color: PdfColors.white),
+                              ),
+                              pw.SizedBox(height: 3),
+                              pw.Text(
+                                'Sona Topas Tower Lt. 11, Jl. Jend. Sudirman Kav. 26',
+                                style: base(size: 8, color: PdfColors.white),
+                              ),
+                              pw.Text(
+                                'Jakarta 12920  |  (021) 250 5337 - 250 5338',
+                                style: base(size: 8, color: PdfColors.white),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -152,7 +182,12 @@ class PdfService {
                         rows: [
                           _InfoRow('Alamat', data.receiverCompany ?? '-'),
                           _InfoRow('Nama', data.receiverName ?? '-'),
-                          _InfoRow('Telepon', data.receiverPhone ?? '-'),
+                          _InfoRow(
+                            'Telepon',
+                            (data.receiverPhone ?? '').isEmpty
+                                ? '-'
+                                : data.receiverPhone!,
+                          ),
                         ],
                       ),
                     ),
@@ -229,20 +264,24 @@ class PdfService {
                       pw.SizedBox(height: 10),
                       pw.Divider(thickness: 0.5, color: _borderColor),
                       pw.SizedBox(height: 8),
-                      pw.Row(
+                      pw.Column(
                         crossAxisAlignment: pw.CrossAxisAlignment.start,
                         children: [
-                          pw.Text(
-                            'Perihal / Desc.',
-                            style: bold(size: 9, color: _textMuted),
+                          pw.Row(
+                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                            children: [
+                              pw.Text(
+                                'Perihal / Desc.',
+                                style: bold(size: 9, color: _textMuted),
+                              ),
+                              pw.SizedBox(width: 8),
+                              pw.Text(': ', style: base(size: 9)),
+                            ],
                           ),
-                          pw.SizedBox(width: 8),
-                          pw.Text(': ', style: base(size: 9)),
-                          pw.Expanded(
-                            child: pw.Text(
-                              data.description ?? '-',
-                              style: base(size: 9),
-                            ),
+                          pw.SizedBox(height: 5),
+                          pw.Text(
+                            data.description ?? '-',
+                            style: base(size: 9),
                           ),
                         ],
                       ),

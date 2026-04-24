@@ -15,6 +15,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final AuthController _authController = AuthController();
 
+  // Palet warna konsisten dengan LoginScreen
+  static const Color _primaryColor = Color(0xFF0A68FF);
+  static const Color _primaryDark = Color(0xFF225BCE);
+  static const Color _textDark = Color(0xFF030F2F);
+  static const Color _textMuted = Color(0xFF6B7280);
+  static const Color _fieldFill = Color(0xFFF3F4F6);
+  static const Color _fieldBorder = Color(0xFFE5E7EB);
+
   String email = '';
   String password = '';
   String fullname = '';
@@ -41,24 +49,24 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }) {
     return InputDecoration(
       filled: true,
-      fillColor: Colors.white,
+      fillColor: _fieldFill,
       hintText: hintText,
-      hintStyle: GoogleFonts.poppins(fontSize: 14),
+      hintStyle: GoogleFonts.poppins(fontSize: 14, color: _textMuted),
       prefixIcon: Padding(
         padding: const EdgeInsets.all(10),
         child: Image.asset(iconPath, width: 20, height: 20),
       ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(20),
-        borderSide: BorderSide.none,
+        borderSide: const BorderSide(color: _fieldBorder),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(20),
-        borderSide: BorderSide.none,
+        borderSide: const BorderSide(color: _fieldBorder),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(20),
-        borderSide: const BorderSide(color: Color(0xFF0A68FF), width: 1.5),
+        borderSide: const BorderSide(color: _primaryColor, width: 1.5),
       ),
     );
   }
@@ -66,7 +74,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF030F2F),
+      backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(15),
         child: Center(
@@ -80,20 +88,53 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     'Create Your Account 🚀',
                     style: GoogleFonts.poppins(
                       fontSize: 23,
-                      color: Colors.white,
+                      color: _textDark,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
                     'Join us and explore more features',
-                    style: GoogleFonts.lato(color: Colors.white),
+                    style: GoogleFonts.lato(color: _textMuted),
                   ),
                   const SizedBox(height: 20),
-                  Image.asset(
-                    'assets/images/banner2.png',
-                    width: 150,
+                  Container(
+                    width: 300,
                     height: 150,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                    padding: const EdgeInsets.all(4),
+                    child: Image.asset(
+                      'assets/icons/app_icon_foreground.png',
+                      width: 300,
+                      height: 150,
+                    ),
                   ),
+                  const SizedBox(height: 20),
+
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      'Full Name',
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        color: _textDark,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  TextFormField(
+                    onChanged: (value) => fullname = value,
+                    style: GoogleFonts.poppins(fontSize: 14, color: _textDark),
+                    validator: (value) =>
+                        value!.isEmpty ? 'Nama lengkap wajib diisi' : null,
+                    decoration: _inputDecoration(
+                      hintText: 'Enter your full name',
+                      iconPath: 'assets/icons/user.jpeg',
+                    ),
+                  ),
+
                   const SizedBox(height: 20),
 
                   Align(
@@ -102,7 +143,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       'Email',
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        color: _textDark,
                       ),
                     ),
                   ),
@@ -110,6 +151,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   TextFormField(
                     onChanged: (value) => email = value,
                     keyboardType: TextInputType.emailAddress,
+                    style: GoogleFonts.poppins(fontSize: 14, color: _textDark),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Email wajib diisi';
@@ -128,35 +170,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
 
                   const SizedBox(height: 20),
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Text(
-                      'Full Name',
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  TextFormField(
-                    onChanged: (value) => fullname = value,
-                    validator: (value) =>
-                        value!.isEmpty ? 'Nama lengkap wajib diisi' : null,
-                    decoration: _inputDecoration(
-                      hintText: 'Enter your full name',
-                      iconPath: 'assets/icons/user.jpeg',
-                    ),
-                  ),
 
-                  const SizedBox(height: 20),
                   Align(
                     alignment: Alignment.topLeft,
                     child: Text(
                       'Password',
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        color: _textDark,
                       ),
                     ),
                   ),
@@ -164,6 +185,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   TextFormField(
                     obscureText: _obscure,
                     onChanged: (value) => password = value,
+                    style: GoogleFonts.poppins(fontSize: 14, color: _textDark),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Password wajib diisi';
@@ -183,6 +205,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               _obscure
                                   ? Icons.visibility
                                   : Icons.visibility_off,
+                              color: _textMuted,
                             ),
                             onPressed: () =>
                                 setState(() => _obscure = !_obscure),
@@ -197,14 +220,22 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         sendOtp(); // ← kirim OTP dulu
                       }
                     },
+                    borderRadius: BorderRadius.circular(20),
                     child: Container(
                       width: 355,
                       height: 60,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         gradient: const LinearGradient(
-                          colors: [Color(0xFF225BCE), Color(0xFF0A68FF)],
+                          colors: [_primaryDark, _primaryColor],
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: _primaryColor.withOpacity(0.25),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
                       ),
                       child: Center(
                         child: _isLoading
@@ -230,7 +261,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         'Already have an account?',
                         style: GoogleFonts.roboto(
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: _textDark,
                         ),
                       ),
                       InkWell(
@@ -243,7 +274,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         child: Text(
                           ' Sign In',
                           style: GoogleFonts.roboto(
-                            color: const Color.fromARGB(255, 51, 121, 242),
+                            color: _primaryColor,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
