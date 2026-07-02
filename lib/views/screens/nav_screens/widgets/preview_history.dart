@@ -8,6 +8,27 @@ import 'package:store_app/services/document_service.dart';
 import 'package:store_app/services/pdf_service.dart';
 import 'package:store_app/views/screens/utils.dart';
 
+// ─── Warna mengacu pada APP COLOR CONSTANTS di utils.dart ─────────────────────
+// kNavyBlue    = Color(0xFF1A3C8F)
+// kAccentBlue  = Color(0xFF2563EB)
+// kLightBg     = Color(0xFFF1F5F9)
+// kTextDark    = Color(0xFF1E293B)
+// kTextMuted   = Color(0xFF64748B)
+// kBorderColor = Color(0xFFCBD5E1)
+
+// Turunan warna lokal
+const _kNavyBg = Color(0xFFEBF0FB);
+const _kAccentBg = Color(0xFFEFF4FF);
+const _kGreenDark = Color(0xFF059669);
+const _kGreenLight = Color(0xFF10B981);
+const _kGreenIconBg = Color(0xFFD1FAE5);
+const _kTealDark = Color(0xFF0F766E);
+const _kTealLight = Color(0xFF0D9488);
+const _kTealIconBg = Color(0xFFCCFBF1);
+const _kRedBg = Color(0xFFFEF2F2);
+const _kRedBorder = Color(0xFFFECACA);
+const _kRedText = Color(0xFFB91C1C);
+
 class BottomSheetPreviewDocument extends ConsumerWidget {
   final String documentId;
   final ScrollController scrollController;
@@ -19,7 +40,7 @@ class BottomSheetPreviewDocument extends ConsumerWidget {
   });
 
   String _formatDateTime(DateTime? date) {
-    if (date == null) return "-";
+    if (date == null) return '-';
     return DateFormat('dd MMM y · HH:mm').format(date);
   }
 
@@ -30,7 +51,7 @@ class BottomSheetPreviewDocument extends ConsumerWidget {
     return FutureBuilder<DocumentDetailModel>(
       future: DocumentService.getDocumentDetail(documentId),
       builder: (context, snapshot) {
-        // Loading
+        // ── Loading ──────────────────────────────────────────────────────────
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Padding(
             padding: EdgeInsets.all(40),
@@ -38,10 +59,10 @@ class BottomSheetPreviewDocument extends ConsumerWidget {
           );
         }
 
-        // Error
+        // ── Error ────────────────────────────────────────────────────────────
         if (snapshot.hasError) {
           final err = snapshot.error.toString();
-          final isNetworkError =
+          final isNetwork =
               err.contains('SocketException') ||
               err.contains('Failed host lookup');
           return Padding(
@@ -53,12 +74,11 @@ class BottomSheetPreviewDocument extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      // ignore: deprecated_member_use
-                      color: Colors.red.withOpacity(0.08),
+                      color: Colors.red.withValues(alpha: 0.08),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      isNetworkError
+                      isNetwork
                           ? Icons.wifi_off_rounded
                           : Icons.error_outline_rounded,
                       size: 40,
@@ -67,7 +87,7 @@ class BottomSheetPreviewDocument extends ConsumerWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    isNetworkError
+                    isNetwork
                         ? 'Tidak dapat terhubung ke server.'
                         : 'Terjadi kesalahan. Coba lagi.',
                     textAlign: TextAlign.center,
@@ -83,74 +103,67 @@ class BottomSheetPreviewDocument extends ConsumerWidget {
 
         return Column(
           children: [
-            // ===== DRAG HANDLE =====
-            const SizedBox(height: 10),
+            // ── Drag handle ──────────────────────────────────────────────────
+            const SizedBox(height: 12),
             Container(
-              width: 40,
+              width: 36,
               height: 4,
               decoration: BoxDecoration(
                 color: kBorderColor,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const SizedBox(height: 14),
 
-            // ===== TITLE BAR =====
+            // ── Header ───────────────────────────────────────────────────────
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    width: 36,
+                    height: 36,
                     decoration: BoxDecoration(
-                      // ignore: deprecated_member_use
-                      color: kAccentBlue.withOpacity(0.1),
+                      color: _kNavyBg,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(
-                      Icons.receipt_long_rounded,
-                      color: kAccentBlue,
+                      Icons.description_outlined,
                       size: 18,
+                      color: kNavyBlue,
                     ),
                   ),
                   const SizedBox(width: 10),
                   const Expanded(
                     child: Text(
-                      'Info Pengiriman',
+                      'Info pengiriman',
                       style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
                         color: kTextDark,
                       ),
                     ),
                   ),
-                  // Tanggal
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
+                      horizontal: 8,
+                      vertical: 4,
                     ),
                     decoration: BoxDecoration(
                       color: kLightBg,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: kBorderColor, width: 0.5),
                     ),
                     child: Text(
                       _formatDateTime(data.receivedDate),
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: kTextMuted,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: const TextStyle(fontSize: 11, color: kTextMuted),
                     ),
                   ),
                 ],
               ),
             ),
+            const Divider(height: 1, color: kBorderColor),
 
-            const SizedBox(height: 12),
-            const Divider(height: 1, color: kLightBg),
-
-            // ===== SCROLLABLE CONTENT =====
+            // ── Scrollable content ───────────────────────────────────────────
             Expanded(
               child: SingleChildScrollView(
                 controller: scrollController,
@@ -159,46 +172,50 @@ class BottomSheetPreviewDocument extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Pengirim
-                    _sectionLabel('Detail Pengirim'),
-                    const SizedBox(height: 10),
-                    _gradientInfoCard(
-                      title: data.senderCompany ?? "-",
-                      subtitle: data.senderName ?? "-",
-                      subtitlePrefix: 'Dari',
+                    const _SectionLabel(label: 'Pengirim', color: kNavyBlue),
+                    const SizedBox(height: 8),
+                    _InfoCard(
+                      companyIcon: Icons.business_outlined,
+                      companyName: data.senderCompany ?? '-',
+                      personLabel: 'Nama pengirim',
+                      personName: data.senderName ?? '-',
                       phone: data.senderPhone,
-                      imagePath: 'assets/icons/Office.png',
                       gradient: const LinearGradient(
-                        colors: [Color(0xFF1A3C8F), Color(0xFF2563EB)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                        colors: [kNavyBlue, kAccentBlue],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
                       ),
+                      personIconBg: _kNavyBg,
+                      personIconColor: kNavyBlue,
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
 
                     // Penerima
-                    _sectionLabel('Detail Penerima'),
-                    const SizedBox(height: 10),
-                    _gradientInfoCard(
-                      title: data.receiverCompany ?? "-",
-                      subtitle: data.receiverName ?? "-",
-                      subtitlePrefix: 'Kepada',
+                    const _SectionLabel(label: 'Penerima', color: kAccentBlue),
+                    const SizedBox(height: 8),
+                    _InfoCard(
+                      companyIcon: Icons.location_city_outlined,
+                      companyName: data.receiverCompany ?? '-',
+                      personLabel: 'Nama penerima',
+                      personName: data.receiverName ?? '-',
                       phone: data.receiverPhone,
-                      imagePath: 'assets/icons/penerima.png',
                       gradient: const LinearGradient(
-                        colors: [Color(0xFF059669), Color(0xFF10B981)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                        colors: [_kGreenDark, _kGreenLight],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
                       ),
+                      personIconBg: _kGreenIconBg,
+                      personIconColor: _kGreenDark,
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
 
                     // Keterangan
-                    _sectionLabel('Keterangan'),
-                    const SizedBox(height: 10),
-                    _descriptionCard(
-                      description: data.description ?? "-",
+                    const _SectionLabel(label: 'Keterangan', color: _kTealDark),
+                    const SizedBox(height: 8),
+                    _KeteranganCard(
+                      description: data.description ?? '-',
                       documentType: data.documentType,
                       signedName: data.signedName,
                       onTapBuktiFoto: () => _showBuktiFoto(context, data),
@@ -206,11 +223,10 @@ class BottomSheetPreviewDocument extends ConsumerWidget {
 
                     const SizedBox(height: 24),
 
-                    // ── Action buttons ──
+                    // Tombol aksi
                     Row(
                       children: [
-                        // Delete
-                        OutlinedButton.icon(
+                        _DeleteButton(
                           onPressed: () async {
                             final confirm = await _showDeleteConfirmation(
                               context,
@@ -221,36 +237,10 @@ class BottomSheetPreviewDocument extends ConsumerWidget {
                               Navigator.pop(context, true);
                             }
                           },
-                          icon: const Icon(
-                            Icons.delete_outline_rounded,
-                            size: 16,
-                            color: Colors.red,
-                          ),
-                          label: const Text(
-                            'Hapus',
-                            style: TextStyle(
-                              color: Colors.red,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Color(0xFFFFCDD2)),
-                            backgroundColor: const Color(0xFFFFEBEB),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 14,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
                         ),
-
-                        const SizedBox(width: 12),
-
-                        // Share
+                        const SizedBox(width: 10),
                         Expanded(
-                          child: ElevatedButton.icon(
+                          child: _ShareButton(
                             onPressed: () async {
                               showDialog(
                                 context: context,
@@ -269,26 +259,6 @@ class BottomSheetPreviewDocument extends ConsumerWidget {
                               // ignore: use_build_context_synchronously
                               Navigator.pop(context);
                             },
-                            icon: const Icon(
-                              Icons.share_rounded,
-                              size: 16,
-                              color: Colors.white,
-                            ),
-                            label: const Text(
-                              'Share',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: kAccentBlue,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              elevation: 0,
-                            ),
                           ),
                         ),
                       ],
@@ -304,321 +274,533 @@ class BottomSheetPreviewDocument extends ConsumerWidget {
   }
 }
 
-// ===== SHARED HELPER WIDGETS =====
+// ─── Section label ─────────────────────────────────────────────────────────────
+class _SectionLabel extends StatelessWidget {
+  final String label;
+  final Color color;
 
-Widget _sectionLabel(String label) {
-  return Row(
-    children: [
-      Container(
-        width: 4,
-        height: 16,
-        decoration: BoxDecoration(
-          color: kAccentBlue,
-          borderRadius: BorderRadius.circular(4),
-        ),
-      ),
-      const SizedBox(width: 8),
-      Text(
-        label,
-        style: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
-          color: kTextMuted,
-          letterSpacing: 0.4,
-        ),
-      ),
-    ],
-  );
-}
+  const _SectionLabel({required this.label, required this.color});
 
-Widget _gradientInfoCard({
-  required String title,
-  required String subtitle,
-  required String subtitlePrefix,
-  required String? phone,
-  required Gradient gradient,
-  required String imagePath,
-}) {
-  return Container(
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      gradient: gradient,
-      borderRadius: BorderRadius.circular(16),
-      boxShadow: [
-        BoxShadow(
-          // ignore: deprecated_member_use
-          color: Colors.black.withOpacity(0.15),
-          blurRadius: 10,
-          offset: const Offset(0, 5),
-        ),
-      ],
-    ),
-    child: Row(
+  @override
+  Widget build(BuildContext context) {
+    return Row(
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.2,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 5),
-              Row(
-                children: [
-                  const Icon(
-                    Icons.person_rounded,
-                    size: 13,
-                    color: Colors.white70,
-                  ),
-                  const SizedBox(width: 4),
-                  Flexible(
-                    child: Text(
-                      '$subtitlePrefix $subtitle',
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 12,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 5),
-              Row(
-                children: [
-                  const Icon(
-                    Icons.phone_rounded,
-                    size: 13,
-                    color: Colors.white70,
-                  ),
-                  const SizedBox(width: 4),
-                  Flexible(
-                    child: Text(
-                      phone ?? "-",
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 12,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
         Container(
-          width: 72,
-          height: 72,
+          width: 3,
+          height: 13,
           decoration: BoxDecoration(
-            // ignore: deprecated_member_use
-            color: Colors.white.withOpacity(0.12),
-            borderRadius: BorderRadius.circular(14),
+            color: color,
+            borderRadius: BorderRadius.circular(2),
           ),
-          child: Transform.scale(
-            scale: 1.5,
-            child: Image.asset(imagePath, fit: BoxFit.contain),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label.toUpperCase(),
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            color: kTextMuted,
+            letterSpacing: 0.5,
           ),
         ),
       ],
-    ),
-  );
+    );
+  }
 }
 
-Widget _descriptionCard({
-  required String description,
-  required String? documentType,
-  required String? signedName,
-  required VoidCallback onTapBuktiFoto,
-}) {
-  return Container(
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      boxShadow: [
-        BoxShadow(
-          // ignore: deprecated_member_use
-          color: Colors.black.withOpacity(0.05),
-          blurRadius: 8,
-          offset: const Offset(0, 3),
-        ),
-      ],
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Header berwarna
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF00B4B0), Color(0xFF007E7C)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-          ),
-          child: Row(
-            children: [
-              const Icon(
-                Icons.info_outline_rounded,
-                size: 16,
-                color: Colors.white,
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                'Keterangan Dokumen',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        ),
+// ─── Info card (pengirim / penerima) ───────────────────────────────────────────
+class _InfoCard extends StatelessWidget {
+  final IconData companyIcon;
+  final String companyName;
+  final String personLabel;
+  final String personName;
+  final String? phone;
+  final LinearGradient gradient;
+  final Color personIconBg;
+  final Color personIconColor;
 
-        // Body
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Description box
-              Container(
-                width: double.infinity,
-                constraints: const BoxConstraints(minHeight: 60),
-                padding: const EdgeInsets.all(12),
+  const _InfoCard({
+    required this.companyIcon,
+    required this.companyName,
+    required this.personLabel,
+    required this.personName,
+    required this.gradient,
+    required this.personIconBg,
+    required this.personIconColor,
+    this.phone,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: kBorderColor, width: 0.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          // ── Gradient header ──────────────────────────────────────────────
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              gradient: gradient,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(companyIcon, size: 20, color: Colors.white),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    companyName,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ── Baris nama ───────────────────────────────────────────────────
+          _InfoRow(
+            iconBg: personIconBg,
+            iconColor: personIconColor,
+            icon: Icons.person_outline_rounded,
+            label: personLabel,
+            value: personName,
+            isLast: false,
+          ),
+
+          // ── Baris telepon ────────────────────────────────────────────────
+          _InfoRow(
+            iconBg: kLightBg,
+            iconColor: kTextMuted,
+            icon: Icons.phone_outlined,
+            label: 'Nomor telepon',
+            value: phone ?? '-',
+            isLast: true,
+            valueMuted: phone == null || phone!.isEmpty,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Info row helper ───────────────────────────────────────────────────────────
+class _InfoRow extends StatelessWidget {
+  final Color iconBg;
+  final Color iconColor;
+  final IconData icon;
+  final String label;
+  final String value;
+  final bool isLast;
+  final bool valueMuted;
+
+  const _InfoRow({
+    required this.iconBg,
+    required this.iconColor,
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.isLast,
+    this.valueMuted = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.white,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+            child: Row(
+              children: [
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: iconBg,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon, size: 14, color: iconColor),
+                ),
+                const SizedBox(width: 10),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label.toUpperCase(),
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        color: kTextMuted,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      value,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: valueMuted ? kTextMuted : kTextDark,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          if (!isLast) const Divider(height: 1, color: Color(0xFFF1F5F9)),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Keterangan card ───────────────────────────────────────────────────────────
+class _KeteranganCard extends StatelessWidget {
+  final String description;
+  final String? documentType;
+  final String? signedName;
+  final VoidCallback onTapBuktiFoto;
+
+  const _KeteranganCard({
+    required this.description,
+    required this.documentType,
+    required this.signedName,
+    required this.onTapBuktiFoto,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: kBorderColor, width: 0.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Gradient header teal ─────────────────────────────────────────
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [_kTealDark, _kTealLight],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.notes_outlined,
+                    size: 20,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Keterangan dokumen',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ── Deskripsi — teks langsung, wrap, tanpa icon/label ───────────
+          Container(
+            width: double.infinity,
+            color: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Text(
+              description,
+              style: const TextStyle(
+                fontSize: 13,
+                color: kTextDark,
+                height: 1.6,
+              ),
+              softWrap: true,
+            ),
+          ),
+          const Divider(height: 1, color: kBorderColor),
+
+          // ── Meta 2 kolom: jenis dokumen + nama penerima TTD ──────────────
+          Container(
+            color: Colors.white,
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Jenis dokumen
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'JENIS DOKUMEN',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                              color: kTextMuted,
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _kNavyBg,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.description_outlined,
+                                  size: 12,
+                                  color: kNavyBlue,
+                                ),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    documentType ?? '-',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: kNavyBlue,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Garis vertikal pemisah
+                  const VerticalDivider(width: 1, color: kBorderColor),
+                  // Nama penerima TTD
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'NAMA PENERIMA TTD',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                              color: kTextMuted,
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _kAccentBg,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.edit_outlined,
+                                  size: 12,
+                                  color: kAccentBlue,
+                                ),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    signedName ?? '-',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: kAccentBlue,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const Divider(height: 1, color: kBorderColor),
+
+          // ── Tombol bukti foto ────────────────────────────────────────────
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            child: GestureDetector(
+              onTap: onTapBuktiFoto,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 7,
+                ),
                 decoration: BoxDecoration(
                   color: kLightBg,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: kBorderColor),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: kBorderColor, width: 0.5),
                 ),
-                child: Text(
-                  description,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: kTextDark,
-                    height: 1.5,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              // Jenis & TTD
-              Row(
-                children: [
-                  _infoChip(
-                    icon: Icons.description_rounded,
-                    label: documentType ?? "-",
-                    // ignore: deprecated_member_use
-                    bgColor: kAccentBlue.withOpacity(0.08),
-                    textColor: kAccentBlue,
-                  ),
-                  const SizedBox(width: 8),
-                  _infoChip(
-                    icon: Icons.draw_rounded,
-                    label: signedName ?? "-",
-                    // ignore: deprecated_member_use
-                    bgColor: const Color(0xFF7C3AED).withOpacity(0.08),
-                    textColor: const Color(0xFF7C3AED),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 12),
-
-              // Bukti foto
-              InkWell(
-                onTap: onTapBuktiFoto,
-                borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    // ignore: deprecated_member_use
-                    color: const Color(0xFFD97706).withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      // ignore: deprecated_member_use
-                      color: const Color(0xFFD97706).withOpacity(0.2),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(
+                      Icons.camera_alt_outlined,
+                      size: 14,
+                      color: kTextMuted,
                     ),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.photo_camera_rounded,
-                        size: 16,
-                        color: Color(0xFFD97706),
+                    SizedBox(width: 6),
+                    Text(
+                      'Lihat bukti foto',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: kTextMuted,
                       ),
-                      SizedBox(width: 6),
-                      Text(
-                        'Lihat Bukti Foto',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFFD97706),
-                        ),
-                      ),
-                      SizedBox(width: 4),
-                      Icon(
-                        Icons.arrow_forward_ios_rounded,
-                        size: 11,
-                        color: Color(0xFFD97706),
-                      ),
-                    ],
-                  ),
+                    ),
+                    SizedBox(width: 4),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 14,
+                      color: kBorderColor,
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 }
 
-Widget _infoChip({
-  required IconData icon,
-  required String label,
-  required Color bgColor,
-  required Color textColor,
-}) {
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-    decoration: BoxDecoration(
-      color: bgColor,
-      borderRadius: BorderRadius.circular(8),
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 13, color: textColor),
-        const SizedBox(width: 5),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: textColor,
-          ),
+// ─── Tombol Hapus ──────────────────────────────────────────────────────────────
+class _DeleteButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  const _DeleteButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        height: 44,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: _kRedBg,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: _kRedBorder, width: 0.5),
         ),
-      ],
-    ),
-  );
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Icon(Icons.delete_outline_rounded, size: 15, color: _kRedText),
+            SizedBox(width: 6),
+            Text(
+              'Hapus',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: _kRedText,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
+// ─── Tombol Bagikan PDF ────────────────────────────────────────────────────────
+class _ShareButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  const _ShareButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        height: 44,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [kNavyBlue, kAccentBlue],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(Icons.share_rounded, size: 15, color: Colors.white),
+            SizedBox(width: 6),
+            Text(
+              'Bagikan PDF',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Dialog bukti foto ─────────────────────────────────────────────────────────
 void _showBuktiFoto(BuildContext context, DocumentData data) {
   showDialog(
     context: context,
@@ -639,8 +821,7 @@ void _showBuktiFoto(BuildContext context, DocumentData data) {
               child: Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  // ignore: deprecated_member_use
-                  color: Colors.black.withOpacity(0.6),
+                  color: Colors.black.withValues(alpha: 0.6),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.close, color: Colors.white, size: 20),
@@ -675,6 +856,7 @@ Widget _previewImage(DocumentData data) {
   );
 }
 
+// ─── Dialog konfirmasi hapus ───────────────────────────────────────────────────
 Future<bool?> _showDeleteConfirmation(BuildContext context) {
   return showDialog<bool>(
     context: context,
@@ -694,8 +876,7 @@ Future<bool?> _showDeleteConfirmation(BuildContext context) {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    // ignore: deprecated_member_use
-                    color: Colors.red.withOpacity(0.08),
+                    color: Colors.red.withValues(alpha: 0.08),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -706,10 +887,10 @@ Future<bool?> _showDeleteConfirmation(BuildContext context) {
                 ),
                 const SizedBox(height: 16),
                 const Text(
-                  'Hapus Dokumen?',
+                  'Hapus dokumen?',
                   style: TextStyle(
                     fontSize: 17,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w500,
                     color: kTextDark,
                   ),
                 ),
@@ -738,7 +919,7 @@ Future<bool?> _showDeleteConfirmation(BuildContext context) {
                           'Batal',
                           style: TextStyle(
                             color: kTextDark,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
@@ -773,7 +954,7 @@ Future<bool?> _showDeleteConfirmation(BuildContext context) {
                                 'Hapus',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                       ),
